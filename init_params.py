@@ -4,43 +4,48 @@ import copy
 
 def helper_celldefaults():
 
-    celldefaults = {'N': 75,
-                    'C': 0.5,
-                    'Taum': 20,
-                    'RestPot': -70,
-                    'ResetPot': -55,
-                    'Threshold': -50,
-                    'RestPot_ca': -85,
-                    'Alpha_ca': 0.5,
-                    'Tau_ca': 80,
-                    'Eff_ca': 0.0,
-                    'tauhm': 20,
-                    'tauhp': 100,
-                    'V_h': -60,
-                    'V_T': 120,
-                    'g_T': 0,
-                    'g_adr_max': 0,
-                    'Vadr_h': -100,
-                    'Vadr_s': 10,
-                    'ADRRevPot': -90,
-                    'g_k_max': 0,
-                    'Vk_h': -34,
-                    'Vk_s': 6.5,
-                    'tau_k_max': 8,
-                    'n_k': 0,
-                    'h': 1, }
+    celldefaults = ParamSet('celldefaults', {'N': 75,
+                                             'C': 0.5,
+                                             'Taum': 20,
+                                             'RestPot': -70,
+                                             'ResetPot': -55,
+                                             'Threshold': -50,
+                                             'RestPot_ca': -85,
+                                             'Alpha_ca': 0.5,
+                                             'Tau_ca': 80,
+                                             'Eff_ca': 0.0,
+                                             'tauhm': 20,
+                                             'tauhp': 100,
+                                             'V_h': -60,
+                                             'V_T': 120,
+                                             'g_T': 0,
+                                             'g_adr_max': 0,
+                                             'Vadr_h': -100,
+                                             'Vadr_s': 10,
+                                             'ADRRevPot': -90,
+                                             'g_k_max': 0,
+                                             'Vk_h': -34,
+                                             'Vk_s': 6.5,
+                                             'tau_k_max': 8,
+                                             'n_k': 0,
+                                             'h': 1, })
 
     return celldefaults
 
 
-def modifier_celldefaults(celldefaults, params=dict()):
+def modifier_celldefaults(celldefaults, params=None):
 
-    celldefaults_modified = {}
+    if params is None:
+
+        params = pd.DataFrame()
+
+    celldefaults_modified = pd.DataFrame()
     celldefaults_modified = copy.deepcopy(celldefaults)
 
     if len(params) != 0:
 
-        celldefaults_modified.update(params)
+        celldefaults_modified = ModifyViaSelector(
+            celldefaults_modified, params)
 
     return celldefaults_modified
 
@@ -73,24 +78,29 @@ def modifier_popspecific(popspecific, pops=dict()):
 
 def helper_receptordefaults():
 
-    receptordefaults = {'Tau_AMPA': 2,
-                        'RevPot_AMPA': 0,
-                        'Tau_GABA': 5,
-                        'RevPot_GABA': -70,
-                        'Tau_NMDA': 100,
-                        'RevPot_NMDA': 0, }
+    receptordefaults = ParamSet('receptordefaults', {'Tau_AMPA': 2,
+                                                     'RevPot_AMPA': 0,
+                                                     'Tau_GABA': 5,
+                                                     'RevPot_GABA': -70,
+                                                     'Tau_NMDA': 100,
+                                                     'RevPot_NMDA': 0, })
 
     return receptordefaults
 
 
-def modifier_receptordefaults(receptordefaults, receps=dict()):
+def modifier_receptordefaults(receptordefaults, receps=None):
 
-    receptordefaults_modified = {}
+    if receps is None:
+
+        receps = pd.DataFrame()
+
+    receptordefaults_modified = pd.DataFrame()
     receptordefaults_modified = copy.deepcopy(receptordefaults)
 
     if len(receps) != 0:
 
-        receptordefaults_modified.update(receps)
+        receptordefaults_modified = ModifyViaSelector(
+            receptordefaults_modified, receps)
 
     return receptordefaults_modified
 
@@ -155,102 +165,120 @@ def modifier_basestim(basestim, base=dict()):
 
 def helper_dpmndefaults():
 
-    dpmndefaults = {'dpmn_tauDOP': 2,
-                    'dpmn_alpha': 0.3,
-                    'dpmn_DAt': 0.0,
-                    'dpmn_taum': 1e100,
-                    'dpmn_dPRE': 0.8,
-                    'dpmn_dPOST': 0.04,
-                    'dpmn_tauE': 15,
-                    'dpmn_tauPRE': 15,
-                    'dpmn_tauPOST': 6,
-                    'dpmn_wmax': 0.3,
-                    'dpmn_w': 0.1286,
-                    'dpmn_Q1': 0.0,
-                    'dpmn_Q2': 0.0,
-                    'dpmn_m': 1.0,
-                    'dpmn_E': 0.0,
-                    'dpmn_DAp': 0.0,
-                    'dpmn_APRE': 0.0,
-                    'dpmn_APOST': 0.0,
-                    'dpmn_XPRE': 0.0,
-                    'dpmn_XPOST': 0.0}
+    dpmndefaults = ParamSet('dpmndefaults', {'dpmn_tauDOP': 2,
+                                             'dpmn_alpha': 0.3,
+                                             'dpmn_DAt': 0.0,
+                                             'dpmn_taum': 1e100,
+                                             'dpmn_dPRE': 0.8,
+                                             'dpmn_dPOST': 0.04,
+                                             'dpmn_tauE': 15,
+                                             'dpmn_tauPRE': 15,
+                                             'dpmn_tauPOST': 6,
+                                             'dpmn_wmax': 0.3,
+                                             'dpmn_w': 0.1286,
+                                             'dpmn_Q1': 0.0,
+                                             'dpmn_Q2': 0.0,
+                                             'dpmn_m': 1.0,
+                                             'dpmn_E': 0.0,
+                                             'dpmn_DAp': 0.0,
+                                             'dpmn_APRE': 0.0,
+                                             'dpmn_APOST': 0.0,
+                                             'dpmn_XPRE': 0.0,
+                                             'dpmn_XPOST': 0.0})
 
     return dpmndefaults
 
 
-def modifier_dpmndefaults(dpmndefaults, dpmns=dict()):
+def modifier_dpmndefaults(dpmndefaults, dpmns=None):
 
-    dpmndefaults_modified = {}
+    if dpmns is None:
+
+        dpmns = pd.DataFrame()
+
+    dpmndefaults_modified = pd.DataFrame
     dpmndefaults_modified = copy.deepcopy(dpmndefaults)
 
     if len(dpmns) != 0:
 
-        dpmndefaults_modified.update(dpmns)
+        dpmnsdefaults_modified = ModifyViaSelector(
+            dpmndefaults_modified, dpmns)
 
     return dpmndefaults_modified
 
 
-def helper_d1defaults(d1=dict()):
+def helper_d1defaults():
 
-    d1defaults = {'dpmn_type': 1,
-                  'dpmn_alphaw': 55 / 3.0,  # ???
-                  'dpmn_a': 1.0,
-                  'dpmn_b': 0.1,
-                  'dpmn_c': 0.05, }
+    d1defaults = ParamSet('d1defaults', {'dpmn_type': 1,
+                                         'dpmn_alphaw': 55 / 3.0,  # ???
+                                         'dpmn_a': 1.0,
+                                         'dpmn_b': 0.1,
+                                         'dpmn_c': 0.05, })
 
     return d1defaults
 
 
-def modifier_d1defaults(d1defaults, d1=dict()):
+def modifier_d1defaults(d1defaults, d1=None):
 
-    d1defaults_modified = {}
+    if d1 is None:
+
+        d1 = pd.DataFrame()
+
+    d1defaults_modified = pd.DataFrame()  # {}
     d1defaults_modified = copy.deepcopy(d1defaults)
 
     if len(d1) != 0:
 
-        d1defaults_modified.update(d1)
+        d1defaults_modified = ModifyViaSelector(d1defaults_modified, d1)
 
     return d1defaults_modified
 
 
-def helper_d2defaults(d2=dict()):
+def helper_d2defaults():
 
-    d2defaults = {'dpmn_type': 2,
-                  'dpmn_alphaw': -45 / 3.0,
-                  'dpmn_a': 0.5,
-                  'dpmn_b': 0.005,
-                  'dpmn_c': 0.05, }
+    d2defaults = ParamSet('d2defaults', {'dpmn_type': 2,
+                                         'dpmn_alphaw': -45 / 3.0,
+                                         'dpmn_a': 0.5,
+                                         'dpmn_b': 0.005,
+                                         'dpmn_c': 0.05, })
 
     return d2defaults
 
 
-def modifier_d2defaults(d2defaults, d2=dict()):
+def modifier_d2defaults(d2defaults, d2=None):
 
-    d2defaults_modified = {}
+    if d2 is None:
+
+        d2 = pd.DataFrame()
+
+    d2defaults_modified = pd.DataFrame()
     d2defaults_modified = copy.deepcopy(d2defaults)
 
     if len(d2) != 0:
 
-        d2defaults_modified.update(d2)
+        d2defaults_modified = ModifyViaSelector(d2defaults_modified, d2)
 
     return d2defaults_modified
 
 
-def helper_actionchannels(channels=dict()):
+def helper_actionchannels():
 
-    actionchannels = {'action': [1, 2], }
+    actionchannels = ParamSet('actionchannels', {'action': [1, 2]},)
 
     return actionchannels
 
 
-def modifier_actionchannels(actionchannels, channels=dict()):
+def modifier_actionchannels(actionchannels, channels=None):
 
-    actionchannels_modified = {}
+    if channels is None:
+
+        channels = pd.DataFrame()
+
+    actionchannels_modified = pd.DataFrame()
     actionchannels_modified = copy.deepcopy(actionchannels)
 
     if len(channels) != 0:
 
-        actionchannels_modified.update(channels)
+        actionchannels_modified = ModifyViaSelector(
+            actionchannels_modified, channels)
 
     return actionchannels_modified
