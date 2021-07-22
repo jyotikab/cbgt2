@@ -34,9 +34,7 @@ def helper_cellparams(params=None):
         return celldefaults
 
     else:
-        celldefaults_modified = ModifyViaSelector(
-            celldefaults_modified, params)
-
+        celldefaults_modified = ModifyViaSelector(celldefaults_modified, params)
         return celldefaults_modified     
 
     
