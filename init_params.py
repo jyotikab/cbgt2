@@ -4,6 +4,7 @@ import copy
 
 def helper_cellparams(params=None):
 
+    print("helper_cellparams")
     celldefaults = ParamSet('celldefaults', {'N': 75,
                                              'C': 0.5,
                                              'Taum': 20,
@@ -34,11 +35,13 @@ def helper_cellparams(params=None):
         celldefaults = ModifyViaSelector(celldefaults, params)
         #cellparams = celldefaults.copy(deep=True)
 
+	print(celldefaults)
 	return celldefaults
 
 
 def helper_popspecific(pops=dict()):
 
+    print("helper_popspecific")
     popspecific = {'LIP': {'N': 204},
                    'FSI': {'C': 0.2, 'Taum': 10},
                    # should be 10 but was 20 due to bug
@@ -54,11 +57,13 @@ def helper_popspecific(pops=dict()):
             for item in pops[key].keys():
                 popspecific[key][item] = pops[key][item]
 
+	print(popspecific)	
 	return popspecific
 
 
 def helper_receptor(receps=None):
 
+    print("helper_receptor")
     receptordefaults = ParamSet('receptordefaults', {'Tau_AMPA': 2,
                                                      'RevPot_AMPA': 0,
                                                      'Tau_GABA': 5,
@@ -69,11 +74,13 @@ def helper_receptor(receps=None):
     if receps is not None:
         receptordefaults = ModifyViaSelector(receptordefaults, receps)
 
+	print(receptordefaults)
 	return receptordefaults
 
 
 def helper_basestim(base=dict()):
 
+    print("helper_basestim")
     basestim = {'FSI': {
         'FreqExt_AMPA': 3.6,
         'MeanExtEff_AMPA': 1.55,
@@ -119,11 +126,13 @@ def helper_basestim(base=dict()):
             for item in base[key].keys():
                 basestim[key][item] = base[key][item]
 
+	print(basestim)
 	return basestim
 
 
 def helper_dpmn(dpmns=None):
 
+    print("helper_dpmn")
     dpmndefaults = ParamSet('dpmndefaults', {'dpmn_tauDOP': 2,
                                              'dpmn_alpha': 0.3,
                                              'dpmn_DAt': 0.0,
@@ -148,11 +157,13 @@ def helper_dpmn(dpmns=None):
     if dpmns is not None:
         dpmnsdefaults = ModifyViaSelector(dpmndefaults, dpmns)
 
+	print(dpmndefaults)
 	return dpmndefaults
 
 
 def helper_d1(d1=None):
 
+    print("helper_d1")
     d1defaults = ParamSet('d1defaults', {'dpmn_type': 1,
                                          'dpmn_alphaw': 55 / 3.0,  # ???
                                          'dpmn_a': 1.0,
@@ -161,11 +172,13 @@ def helper_d1(d1=None):
     if d1 is not None:
         d1defaults = ModifyViaSelector(d1defaults, d1)
 
+	print(d1defaults)
 	return d1defaults
 
 
 def helper_d2(d2=None):
 
+    print("helper_d2")
     d2defaults = ParamSet('d2defaults', {'dpmn_type': 2,
                                          'dpmn_alphaw': -45 / 3.0,
                                          'dpmn_a': 0.5,
@@ -174,14 +187,16 @@ def helper_d2(d2=None):
     if d2 is not None:
         d2defaults = ModifyViaSelector(d2defaults, d2)
 
+	print(d2defaults)
 	return d2defaults
 
 
 def helper_actionchannels(channels=None):
 
+    print("helper_actionchannels")
     actionchannels = ParamSet('actionchannels', {'action': [1, 2]},)
 
     if channels is not None:
         actionchannels = ModifyViaSelector(actionchannels, channels)
-
+	print(actionchannels)
 	return actionchannels
