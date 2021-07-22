@@ -32,13 +32,13 @@ def helper_cellparams(params=None):
 
     if params is not None:
         celldefaults = ModifyViaSelector(celldefaults, params)
-		#cellparams = celldefaults.copy(deep=True)
+        #cellparams = celldefaults.copy(deep=True)
 
 	return celldefaults
-    
+
+
 def helper_popspecific(pops=dict()):
 
-    
     popspecific = {'LIP': {'N': 204},
                    'FSI': {'C': 0.2, 'Taum': 10},
                    # should be 10 but was 20 due to bug
@@ -47,7 +47,7 @@ def helper_popspecific(pops=dict()):
                    'LIPI': {'N': 186, 'C': 0.2, 'Taum': 10},
                    'Th': {'Taum': 27.78}}
 
-    #if len(pops) ==0:
+    # if len(pops) ==0:
     #    return popspecific
     if len(pops) != 0:
         for key in pops.keys():
@@ -59,7 +59,6 @@ def helper_popspecific(pops=dict()):
 
 def helper_receptor(receps=None):
 
-	
     receptordefaults = ParamSet('receptordefaults', {'Tau_AMPA': 2,
                                                      'RevPot_AMPA': 0,
                                                      'Tau_GABA': 5,
@@ -69,7 +68,7 @@ def helper_receptor(receps=None):
 
     if receps is not None:
         receptordefaults = ModifyViaSelector(receptordefaults, receps)
-	
+
 	return receptordefaults
 
 
@@ -115,7 +114,7 @@ def helper_basestim(base=dict()):
         'MeanExtEff_AMPA': 2.5,
         'MeanExtCon_AMPA': 800}, }
 
-    if len(base) !=0:
+    if len(base) != 0:
         for key in base.keys():
             for item in base[key].keys():
                 basestim[key][item] = base[key][item]
@@ -161,7 +160,8 @@ def helper_d1(d1=None):
                                          'dpmn_c': 0.05, })
     if d1 is not None:
         d1defaults = ModifyViaSelector(d1defaults, d1)
-        return d1defaults
+
+	return d1defaults
 
 
 def helper_d2(d2=None):
@@ -173,6 +173,7 @@ def helper_d2(d2=None):
                                          'dpmn_c': 0.05, })
     if d2 is not None:
         d2defaults = ModifyViaSelector(d2defaults, d2)
+
 	return d2defaults
 
 
@@ -182,5 +183,5 @@ def helper_actionchannels(channels=None):
 
     if channels is not None:
         actionchannels = ModifyViaSelector(actionchannels, channels)
-	
+
 	return actionchannels
