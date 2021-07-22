@@ -30,13 +30,11 @@ def helper_cellparams(params=None):
                                              'n_k': 0,
                                              'h': 1, })
 
-    if params is None:
-        return celldefaults
+    if params is not None:
+        celldefaults = ModifyViaSelector(celldefaults, params)
+		#cellparams = celldefaults.copy(deep=True)
 
-    else:
-        celldefaults_modified = ModifyViaSelector(celldefaults_modified, params)
-        return celldefaults_modified     
-
+	return celldefaults
     
 def helper_popspecific(pops=dict()):
 
@@ -49,18 +47,19 @@ def helper_popspecific(pops=dict()):
                    'LIPI': {'N': 186, 'C': 0.2, 'Taum': 10},
                    'Th': {'Taum': 27.78}}
 
-    if len(pops) ==0:
-        return popspecific
-    else:
+    #if len(pops) ==0:
+    #    return popspecific
+    if len(pops) != 0:
         for key in pops.keys():
             for item in pops[key].keys():
-                popspecific_modified[key][item] = pops[key][item]
+                popspecific[key][item] = pops[key][item]
 
-        return popspecific_modified
+	return popspecific
 
 
 def helper_receptor(receps=None):
 
+	
     receptordefaults = ParamSet('receptordefaults', {'Tau_AMPA': 2,
                                                      'RevPot_AMPA': 0,
                                                      'Tau_GABA': 5,
@@ -68,11 +67,10 @@ def helper_receptor(receps=None):
                                                      'Tau_NMDA': 100,
                                                      'RevPot_NMDA': 0, })
 
-    if receps is None:
-        return receptordefaults
-    else:
-        receptordefaults_modified = ModifyViaSelector(receptordefaults_modified, receps)
-        return receptordefaults_modified
+    if receps is not None:
+        receptordefaults = ModifyViaSelector(receptordefaults, receps)
+	
+	return receptordefaults
 
 
 def helper_basestim(base=dict()):
@@ -118,13 +116,11 @@ def helper_basestim(base=dict()):
         'MeanExtCon_AMPA': 800}, }
 
     if len(base) !=0:
-        return basestim
-    else:
         for key in base.keys():
             for item in base[key].keys():
-                basestim_modified[key][item] = base[key][item]
+                basestim[key][item] = base[key][item]
 
-        return basestim_modified
+	return basestim
 
 
 def helper_dpmn(dpmns=None):
@@ -150,11 +146,10 @@ def helper_dpmn(dpmns=None):
                                              'dpmn_XPRE': 0.0,
                                              'dpmn_XPOST': 0.0})
 
-    if dpmns is None:
-        return dpmndefaults
-    else:
-        dpmnsdefaults_modified = ModifyViaSelector(dpmndefaults_modified, dpmns)
-        return dpmndefaults_modified
+    if dpmns is not None:
+        dpmnsdefaults = ModifyViaSelector(dpmndefaults, dpmns)
+
+	return dpmndefaults
 
 
 def helper_d1(d1=None):
@@ -164,11 +159,9 @@ def helper_d1(d1=None):
                                          'dpmn_a': 1.0,
                                          'dpmn_b': 0.1,
                                          'dpmn_c': 0.05, })
-    if d1 is None:
+    if d1 is not None:
+        d1defaults = ModifyViaSelector(d1defaults, d1)
         return d1defaults
-    else:
-        d1defaults_modified = ModifyViaSelector(d1defaults_modified, d1)
-        return d1defaults_modified
 
 
 def helper_d2(d2=None):
@@ -178,19 +171,16 @@ def helper_d2(d2=None):
                                          'dpmn_a': 0.5,
                                          'dpmn_b': 0.005,
                                          'dpmn_c': 0.05, })
-    if d2 is None:
-        return d2defaults
-    else:
-        d2defaults_modified = ModifyViaSelector(d2defaults_modified, d2)
-        return d2defaults_modified
+    if d2 is not None:
+        d2defaults = ModifyViaSelector(d2defaults, d2)
+	return d2defaults
 
 
 def helper_actionchannels(channels=None):
 
     actionchannels = ParamSet('actionchannels', {'action': [1, 2]},)
 
-    if channels is None:
-        return actionchannels
-    else:
-        actionchannels_modified = ModifyViaSelector(actionchannels_modified, channels)
-        return actionchannels_modified
+    if channels is not None:
+        actionchannels = ModifyViaSelector(actionchannels, channels)
+	
+	return actionchannels
