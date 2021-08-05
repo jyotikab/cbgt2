@@ -550,10 +550,14 @@ def dropna(df, axis=0):
 def untrace(data):
     if isinstance(data, list):
         return [x.val for x in data]
+    if isinstance(data, pd.DataFrame):
+        return trace(data,None).applymap(lambda x: x.val)
     return data.val
 
 
 def gettrace(data):
     if isinstance(data, list):
         return [x.meta for x in data]
+    if isinstance(data, pd.DataFrame):
+        return trace(data,None).applymap(lambda x: x.meta)
     return data.meta

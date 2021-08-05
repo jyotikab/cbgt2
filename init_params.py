@@ -1,7 +1,9 @@
 from frontendhelpers import *
+from tracetype import *
 import copy
 import pdb
-
+import numpy as np
+import scipy.stats as sp_st
 
 def helper_cellparams(params=None):
 
@@ -178,9 +180,83 @@ def helper_d2(d2=None):
 
 def helper_actionchannels(channels=None):
     
-    actionchannels = ParamSet('actionchannels', {'action': [1, 2]},)
+    actionchannels = ParamSet('actionchannels', {'action': [1, 2]},  )
 
     if channels is not None:
         actionchannels = ModifyViaSelector(actionchannels, channels)
     
     return actionchannels
+
+
+def helper_init_Q_support_params(q_support=None):
+    
+    Q_support_params = ParamSet('Q_support_params',{'bayes_unif_min':0.,'bayes_unif_max':2.0, 'bayes_H':0.05, 'bayes_sF':1.25, 'q_alpha': 0.45, 'dpmn_CPP_scale':15.,'reward_value' :-1, 'chosen_action': 1})
+    
+    if q_support is not None:
+        Q_support_params = ModifyViaSelector(Q_support_params,q_support)
+    
+    #print("Q_support_params")
+    #print(Q_support_params)
+    return Q_support_params
+    
+def helper_init_Q_df(channels,q_df=None):
+    
+    Q_df = ParamSet('Q_df',{'Q_val': [ 0.5]*len(channels["action"])})
+    Q_df["action"] = channels["action"].copy()
+    
+    if q_df is not None:
+        Q_df = ModifyViaSelector(Q_df,q_df)
+    
+    #print("Q_df")
+    #print(Q_df)
+    return Q_df
+    
+
+def helper_update_chosen_action(Q_support_params,action=None):
+    Q_support_params.chosen_action = 1 # By default, the chosen action is 1
+    
+    if action is not None:
+        Q_support_params.chosen_action = action
+    
+    print("update chosen action")
+    #print(Q_support_params)
+    return Q_support_params
+
+# At this point we assume that the chosen_action has been updated in Q_support_params
+def helper_update_Q_df(Q_df, Q_support_params,dpmndefaults): 
+    print("In update_Q_df")    
+    Q_support_params = untrace(Q_support_params)
+    Q_df = untrace(Q_df)
+    
+    u_val = sp_st.uniform.pdf(Q_support_params.reward_value ,Q_support_params.bayes_unif_min, Q_support_params.bayes_unif_max)
+   
+    chosen_action = Q_support_params.chosen_action.values[0]
+    
+    q_val_chosen = Q_df.loc[Q_df["action"]==chosen_action]["Q_val"]
+    
+    n_val = sp_st.norm.pdf(Q_support_params.reward_value,q_val_chosen, Q_support_params.bayes_sF)
+    
+    bayes_CPP = (u_val * Q_support_params.bayes_H) / ((u_val * Q_support_params.bayes_H) + (n_val * (1 - Q_support_params.bayes_H)))
+
+  
+    q_error = Q_support_params.reward_value.values - q_val_chosen.values
+   
+    q_val_updated = q_val_chosen.values + Q_support_params.q_alpha.values * q_error
+        
+    # Copy the updated q value back into the Q data frame
+    Q_df.loc[Q_df["action"]==chosen_action,"Q_val"] = q_val_updated
+    
+    dpmndefaults.dpmn_DAp = q_error * bayes_CPP * Q_support_params.dpmn_CPP_scale
+    
+
+    print("Q_support_params")
+    print(Q_support_params)
+    print("Q_df")
+    print(Q_df)
+    
+    return Q_df, Q_support_params, dpmndefaults
+    
+    
+    
+    
+    
