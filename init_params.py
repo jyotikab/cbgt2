@@ -195,8 +195,6 @@ def helper_init_Q_support_params(q_support=None):
     if q_support is not None:
         Q_support_params = ModifyViaSelector(Q_support_params,q_support)
     
-    #print("Q_support_params")
-    #print(Q_support_params)
     return Q_support_params
     
 def helper_init_Q_df(channels,q_df=None):
@@ -207,8 +205,6 @@ def helper_init_Q_df(channels,q_df=None):
     if q_df is not None:
         Q_df = ModifyViaSelector(Q_df,q_df)
     
-    #print("Q_df")
-    #print(Q_df)
     return Q_df
     
 
@@ -219,7 +215,7 @@ def helper_update_chosen_action(Q_support_params,action=None):
         Q_support_params.chosen_action = action
     
     print("update chosen action")
-    #print(Q_support_params)
+
     return Q_support_params
 
 # At this point we assume that the chosen_action has been updated in Q_support_params
@@ -229,7 +225,7 @@ def helper_update_Q_df(Q_df, Q_support_params,dpmndefaults):
     Q_df = untrace(Q_df)
     
     u_val = sp_st.uniform.pdf(Q_support_params.reward_value ,Q_support_params.bayes_unif_min, Q_support_params.bayes_unif_max)
-   
+
     chosen_action = Q_support_params.chosen_action.values[0]
     
     q_val_chosen = Q_df.loc[Q_df["action"]==chosen_action]["Q_val"]
@@ -238,7 +234,6 @@ def helper_update_Q_df(Q_df, Q_support_params,dpmndefaults):
     
     bayes_CPP = (u_val * Q_support_params.bayes_H) / ((u_val * Q_support_params.bayes_H) + (n_val * (1 - Q_support_params.bayes_H)))
 
-  
     q_error = Q_support_params.reward_value.values - q_val_chosen.values
    
     q_val_updated = q_val_chosen.values + Q_support_params.q_alpha.values * q_error
@@ -247,12 +242,6 @@ def helper_update_Q_df(Q_df, Q_support_params,dpmndefaults):
     Q_df.loc[Q_df["action"]==chosen_action,"Q_val"] = q_val_updated
     
     dpmndefaults.dpmn_DAp = q_error * bayes_CPP * Q_support_params.dpmn_CPP_scale
-    
-
-    print("Q_support_params")
-    print(Q_support_params)
-    print("Q_df")
-    print(Q_df)
     
     return Q_df, Q_support_params, dpmndefaults
     
