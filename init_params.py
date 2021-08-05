@@ -197,10 +197,10 @@ def helper_init_Q_support_params(q_support=None):
     
     return Q_support_params
     
-def helper_init_Q_df(channels,q_df=None):
+def helper_init_Q_df(actionchannels,q_df=None):
     
-    Q_df = ParamSet('Q_df',{'Q_val': [ 0.5]*len(channels["action"])})
-    Q_df["action"] = channels["action"].copy()
+    Q_df = ParamSet('Q_df',{'Q_val': [ 0.5]*len(actionchannels["action"])})
+    Q_df["action"] = actionchannels["action"].copy()
     
     if q_df is not None:
         Q_df = ModifyViaSelector(Q_df,q_df)
