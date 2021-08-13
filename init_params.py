@@ -187,63 +187,123 @@ def helper_actionchannels(channels=None):
     
     return actionchannels
 
+# At some point we have to replace one variable/action(eg t1_epochs, t2_epochs ) by a single data structure. 
+# Change this function accordingly. We also have to decide if the format is n_trials x channels or the otherway round
 
-def helper_init_Q_support_params(q_support=None):
+# And maybe this function does not belong in init_params.py. It felt too specific for frontendhelpers.py too. Find a place
+def get_reward_value(t1_epochs,t2_epochs,chosen_action,trial_num):
+    print("get_reward_value")
+    rew_epochs = np.vstack((t1_epochs,t2_epochs)).T
     
-    Q_support_params = ParamSet('Q_support_params',{'bayes_unif_min':0.,'bayes_unif_max':2.0, 'bayes_H':0.05, 'bayes_sF':1.25, 'q_alpha': 0.45, 'dpmn_CPP_scale':15.,'reward_value' :-1, 'chosen_action': 1})
+    
+    # Assuming a n_trials x channels array, ideally this should be a data frame ? so that we do not have to convert chosen action to index chosen_action-1
+    reward_val = rew_epochs[trial_num][chosen_action-1]
+    print(reward_val)
+    return reward_val
+    
+
+# Change the reward_value, chosen action to arrays, trial numbers
+def helper_init_Q_support_params(q_support=None):
+    print("helper_init_Q_support_params")
+    Q_support_params = ParamSet('Q_support_params',{'bayes_unif_min':0.,'bayes_unif_max':2.0, 'bayes_H':0.05, 'bayes_sF':1.25, 'q_alpha': 0.45, 'dpmn_CPP_scale':15.,'reward_value' :-1., 'chosen_action': 1})
     
     if q_support is not None:
         Q_support_params = ModifyViaSelector(Q_support_params,q_support)
     
+    print(Q_support_params)
+    return Q_support_params
+
+def helper_update_Q_support_params(Q_support_params,reward_val,chosen_action):
+    print("helper_update_Q_support_params")
+    Q_support_params = untrace(Q_support_params)
+    
+    Q_support_params.reward_value = reward_val
+    Q_support_params.chosen_action = chosen_action
+    
+    print(Q_support_params)
     return Q_support_params
     
+# Q_df should have columns are actions, rows are trial numbers
 def helper_init_Q_df(actionchannels,q_df=None):
+    print("helper_init_Q_df")
+    # q_df should be a n_trial+1 x action channels array
+    # Start with only dataframe an merge with a new one every trial number - merge that in update Q_df
+    # Another Q_val function to initialize the q_val specifically, whether it is same for all actions or not, 0.5
     
-    Q_df = ParamSet('Q_df',{'Q_val': [ 0.5]*len(actionchannels["action"])})
-    Q_df["action"] = actionchannels["action"].copy()
+    num_actions = len(actionchannels["action"])
+    print("num_actions",num_actions)
+    Q_df = pd.DataFrame(columns=[actionchannels.iloc[na]["action"] for na in np.arange(num_actions)])
+    print("Q_df",Q_df)
+    Q_df = Q_df.append({actionchannels.iloc[na]["action"]:0.5 for na in np.arange(num_actions)},ignore_index=True)
+    print("Q_df",Q_df)
+    # Different initial values for Q_df should be taken care when calling this function with q_df and non-None value
+    # eg. q_df = pd.DataFrame({1: 0.5, 2: 0.6})
+    
     
     if q_df is not None:
+        Q_df = pd.DataFrame(columns=[actionchannels.iloc[na]["action"] for na in np.arange(num_actions)])
+        print("Q_df",Q_df)
+        Q_df = Q_df.append({actionchannels.iloc[na]["action"]:0.5 for na in np.arange(num_actions)},ignore_index=True)
+
         Q_df = ModifyViaSelector(Q_df,q_df)
     
     return Q_df
-    
 
-def helper_update_chosen_action(Q_support_params,action=None):
-    Q_support_params.chosen_action = 1 # By default, the chosen action is 1
-    
-    if action is not None:
-        Q_support_params.chosen_action = action
-    
-    print("update chosen action")
-
-    return Q_support_params
 
 # At this point we assume that the chosen_action has been updated in Q_support_params
-def helper_update_Q_df(Q_df, Q_support_params,dpmndefaults): 
-    print("In update_Q_df")    
+def helper_update_Q_df(Q_df, Q_support_params,dpmndefaults,trial_num): 
+    print("In update_Q_df") 
+
     Q_support_params = untrace(Q_support_params)
-    Q_df = untrace(Q_df)
+    #Q_df = untrace(Q_df)
+    
+    print("Q_support_params")
+    print(Q_support_params)
+    print("Q_df")
+    print(Q_df)
+    print("trial_num",trial_num)
+    trial_wise_q_df = Q_df.iloc[trial_num] # is this the convention ?, or start with trial_num=0
+    trial_wise_chosen_action = Q_support_params.chosen_action
     
     u_val = sp_st.uniform.pdf(Q_support_params.reward_value ,Q_support_params.bayes_unif_min, Q_support_params.bayes_unif_max)
 
-    chosen_action = Q_support_params.chosen_action.values[0]
+      
+    #q_val_chosen = trial_wise_q_df.loc[trial_wise_q_df["action"]==trial_wise_chosen_action]["Q_val"]
+    q_val_chosen = trial_wise_q_df[trial_wise_chosen_action]
     
-    q_val_chosen = Q_df.loc[Q_df["action"]==chosen_action]["Q_val"]
-    
-    n_val = sp_st.norm.pdf(Q_support_params.reward_value,q_val_chosen, Q_support_params.bayes_sF)
+    n_val = sp_st.norm.pdf(Q_support_params.reward_value, q_val_chosen, Q_support_params.bayes_sF)
     
     bayes_CPP = (u_val * Q_support_params.bayes_H) / ((u_val * Q_support_params.bayes_H) + (n_val * (1 - Q_support_params.bayes_H)))
 
-    q_error = Q_support_params.reward_value.values - q_val_chosen.values
+    q_error = Q_support_params.reward_value - q_val_chosen.values
    
     q_val_updated = q_val_chosen.values + Q_support_params.q_alpha.values * q_error
         
-    # Copy the updated q value back into the Q data frame
-    Q_df.loc[Q_df["action"]==chosen_action,"Q_val"] = q_val_updated
+    # Copy the updated q value back into thie Q data frame
     
+    
+    # First append an empty dataframe for the new trial
+    #Q_df = Q_df.append({na:Q_df  for na in list(Q_df.columns)},ignore_index=True) # Replace nan with previous trial Q-value
+    # Duplicate the last row of df
+    new_data = pd.DataFrame(Q_df[-1:].values, columns=Q_df.columns)
+    Q_df = Q_df.append(new_data)
+    # Update the correct value with q_val_updated
+    Q_df.iloc[trial_num+1][trial_wise_chosen_action] = q_val_updated
+
+
     dpmndefaults.dpmn_DAp = q_error * bayes_CPP * Q_support_params.dpmn_CPP_scale
-    
+    print("====================================================================")
+    print("Q_support_params")
+    print(Q_support_params)
+
+    print("Q_df")
+    print(Q_df)
+
+    print("dpmndefaults")
+    print(dpmndefaults)
+
     return Q_df, Q_support_params, dpmndefaults
+    #return dpmndefaults, #Q_support_params
     
     
     
