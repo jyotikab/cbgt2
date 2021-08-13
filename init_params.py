@@ -1,8 +1,11 @@
 from frontendhelpers import *
+from tracetype import *
 import copy
+import pdb
+import numpy as np
+import scipy.stats as sp_st
 
-
-def helper_celldefaults():
+def helper_cellparams(params=None):
 
     celldefaults = ParamSet('celldefaults', {'N': 75,
                                              'C': 0.5,
@@ -30,27 +33,14 @@ def helper_celldefaults():
                                              'n_k': 0,
                                              'h': 1, })
 
+    if params is not None:
+        
+        celldefaults = ModifyViaSelector(celldefaults, params)
+        
     return celldefaults
 
 
-def modifier_celldefaults(celldefaults, params=None):
-
-    if params is None:
-
-        params = pd.DataFrame()
-
-    celldefaults_modified = pd.DataFrame()
-    celldefaults_modified = copy.deepcopy(celldefaults)
-
-    if len(params) != 0:
-
-        celldefaults_modified = ModifyViaSelector(
-            celldefaults_modified, params)
-
-    return celldefaults_modified
-
-
-def helper_popspecific():
+def helper_popspecific(pops=dict()):
 
     popspecific = {'LIP': {'N': 204},
                    'FSI': {'C': 0.2, 'Taum': 10},
@@ -60,23 +50,15 @@ def helper_popspecific():
                    'LIPI': {'N': 186, 'C': 0.2, 'Taum': 10},
                    'Th': {'Taum': 27.78}}
 
+    if pops is not None:
+        for key in pops.keys():
+            for item in pops[key].keys():
+                popspecific[key][item] = pops[key][item]
+
     return popspecific
 
 
-def modifier_popspecific(popspecific, pops=dict()):
-
-    popspecific_modified = {}
-    popspecific_modified = copy.deepcopy(popspecific)
-
-    if len(pops) != 0:
-        for key in pops.keys():
-            for item in pops[key].keys():
-                popspecific_modified[key][item] = pops[key][item]
-
-    return popspecific_modified
-
-
-def helper_receptordefaults():
+def helper_receptor(receps=None):
 
     receptordefaults = ParamSet('receptordefaults', {'Tau_AMPA': 2,
                                                      'RevPot_AMPA': 0,
@@ -85,27 +67,13 @@ def helper_receptordefaults():
                                                      'Tau_NMDA': 100,
                                                      'RevPot_NMDA': 0, })
 
+    if receps is not None:
+        receptordefaults = ModifyViaSelector(receptordefaults, receps)
+
     return receptordefaults
 
 
-def modifier_receptordefaults(receptordefaults, receps=None):
-
-    if receps is None:
-
-        receps = pd.DataFrame()
-
-    receptordefaults_modified = pd.DataFrame()
-    receptordefaults_modified = copy.deepcopy(receptordefaults)
-
-    if len(receps) != 0:
-
-        receptordefaults_modified = ModifyViaSelector(
-            receptordefaults_modified, receps)
-
-    return receptordefaults_modified
-
-
-def helper_basestim():
+def helper_basestim(base=dict()):
 
     basestim = {'FSI': {
         'FreqExt_AMPA': 3.6,
@@ -147,23 +115,15 @@ def helper_basestim():
         'MeanExtEff_AMPA': 2.5,
         'MeanExtCon_AMPA': 800}, }
 
+    if base is not None:
+        for key in base.keys():
+            for item in base[key].keys():
+                basestim[key][item] = base[key][item]
+
     return basestim
 
 
-def modifier_basestim(basestim, base=dict()):
-
-    basestim_modified = {}
-    basestim_modified = copy.deepcopy(basestim)
-
-    if len(base) != 0:
-        for key in base.keys():
-            for item in base[key].keys():
-                basestim_modified[key][item] = base[key][item]
-
-    return basestim_modified
-
-
-def helper_dpmndefaults():
+def helper_dpmn(dpmns=None):
 
     dpmndefaults = ParamSet('dpmndefaults', {'dpmn_tauDOP': 2,
                                              'dpmn_alpha': 0.3,
@@ -186,99 +146,166 @@ def helper_dpmndefaults():
                                              'dpmn_XPRE': 0.0,
                                              'dpmn_XPOST': 0.0})
 
+    if dpmns is not None:
+        dpmnsdefaults = ModifyViaSelector(dpmndefaults, dpmns)
+
     return dpmndefaults
 
 
-def modifier_dpmndefaults(dpmndefaults, dpmns=None):
-
-    if dpmns is None:
-
-        dpmns = pd.DataFrame()
-
-    dpmndefaults_modified = pd.DataFrame
-    dpmndefaults_modified = copy.deepcopy(dpmndefaults)
-
-    if len(dpmns) != 0:
-
-        dpmnsdefaults_modified = ModifyViaSelector(
-            dpmndefaults_modified, dpmns)
-
-    return dpmndefaults_modified
-
-
-def helper_d1defaults():
+def helper_d1(d1=None):
 
     d1defaults = ParamSet('d1defaults', {'dpmn_type': 1,
                                          'dpmn_alphaw': 55 / 3.0,  # ???
                                          'dpmn_a': 1.0,
                                          'dpmn_b': 0.1,
                                          'dpmn_c': 0.05, })
+    if d1 is not None:
+        d1defaults = ModifyViaSelector(d1defaults, d1)
 
     return d1defaults
 
 
-def modifier_d1defaults(d1defaults, d1=None):
-
-    if d1 is None:
-
-        d1 = pd.DataFrame()
-
-    d1defaults_modified = pd.DataFrame()  # {}
-    d1defaults_modified = copy.deepcopy(d1defaults)
-
-    if len(d1) != 0:
-
-        d1defaults_modified = ModifyViaSelector(d1defaults_modified, d1)
-
-    return d1defaults_modified
-
-
-def helper_d2defaults():
+def helper_d2(d2=None):
 
     d2defaults = ParamSet('d2defaults', {'dpmn_type': 2,
                                          'dpmn_alphaw': -45 / 3.0,
                                          'dpmn_a': 0.5,
                                          'dpmn_b': 0.005,
                                          'dpmn_c': 0.05, })
+    if d2 is not None:
+        d2defaults = ModifyViaSelector(d2defaults, d2)
 
     return d2defaults
 
 
-def modifier_d2defaults(d2defaults, d2=None):
+def helper_actionchannels(channels=None):
+    
+    actionchannels = ParamSet('actionchannels', {'action': [1, 2]},  )
 
-    if d2 is None:
-
-        d2 = pd.DataFrame()
-
-    d2defaults_modified = pd.DataFrame()
-    d2defaults_modified = copy.deepcopy(d2defaults)
-
-    if len(d2) != 0:
-
-        d2defaults_modified = ModifyViaSelector(d2defaults_modified, d2)
-
-    return d2defaults_modified
-
-
-def helper_actionchannels():
-
-    actionchannels = ParamSet('actionchannels', {'action': [1, 2]},)
-
+    if channels is not None:
+        actionchannels = ModifyViaSelector(actionchannels, channels)
+    
     return actionchannels
 
+# At some point we have to replace one variable/action(eg t1_epochs, t2_epochs ) by a single data structure. 
+# Change this function accordingly. We also have to decide if the format is n_trials x channels or the otherway round
 
-def modifier_actionchannels(actionchannels, channels=None):
+# And maybe this function does not belong in init_params.py. It felt too specific for frontendhelpers.py too. Find a place
+def get_reward_value(t1_epochs,t2_epochs,chosen_action,trial_num):
+    print("get_reward_value")
+    rew_epochs = np.vstack((t1_epochs,t2_epochs)).T
+    
+    
+    # Assuming a n_trials x channels array, ideally this should be a data frame ? so that we do not have to convert chosen action to index chosen_action-1
+    reward_val = rew_epochs[trial_num][chosen_action-1]
+    print(reward_val)
+    return reward_val
+    
 
-    if channels is None:
+# Change the reward_value, chosen action to arrays, trial numbers
+def helper_init_Q_support_params(q_support=None):
+    print("helper_init_Q_support_params")
+    Q_support_params = ParamSet('Q_support_params',{'bayes_unif_min':0.,'bayes_unif_max':2.0, 'bayes_H':0.05, 'bayes_sF':1.25, 'q_alpha': 0.45, 'dpmn_CPP_scale':15.,'reward_value' :-1., 'chosen_action': 1})
+    
+    if q_support is not None:
+        Q_support_params = ModifyViaSelector(Q_support_params,q_support)
+    
+    print(Q_support_params)
+    return Q_support_params
 
-        channels = pd.DataFrame()
+def helper_update_Q_support_params(Q_support_params,reward_val,chosen_action):
+    print("helper_update_Q_support_params")
+    Q_support_params = untrace(Q_support_params)
+    
+    Q_support_params.reward_value = reward_val
+    Q_support_params.chosen_action = chosen_action
+    
+    print(Q_support_params)
+    return Q_support_params
+    
+# Q_df should have columns are actions, rows are trial numbers
+def helper_init_Q_df(actionchannels,q_df=None):
+    print("helper_init_Q_df")
+    # q_df should be a n_trial+1 x action channels array
+    # Start with only dataframe an merge with a new one every trial number - merge that in update Q_df
+    # Another Q_val function to initialize the q_val specifically, whether it is same for all actions or not, 0.5
+    
+    num_actions = len(actionchannels["action"])
+    print("num_actions",num_actions)
+    Q_df = pd.DataFrame(columns=[actionchannels.iloc[na]["action"] for na in np.arange(num_actions)])
+    print("Q_df",Q_df)
+    Q_df = Q_df.append({actionchannels.iloc[na]["action"]:0.5 for na in np.arange(num_actions)},ignore_index=True)
+    print("Q_df",Q_df)
+    # Different initial values for Q_df should be taken care when calling this function with q_df and non-None value
+    # eg. q_df = pd.DataFrame({1: 0.5, 2: 0.6})
+    
+    
+    if q_df is not None:
+        Q_df = pd.DataFrame(columns=[actionchannels.iloc[na]["action"] for na in np.arange(num_actions)])
+        print("Q_df",Q_df)
+        Q_df = Q_df.append({actionchannels.iloc[na]["action"]:0.5 for na in np.arange(num_actions)},ignore_index=True)
 
-    actionchannels_modified = pd.DataFrame()
-    actionchannels_modified = copy.deepcopy(actionchannels)
+        Q_df = ModifyViaSelector(Q_df,q_df)
+    
+    return Q_df
 
-    if len(channels) != 0:
 
-        actionchannels_modified = ModifyViaSelector(
-            actionchannels_modified, channels)
+# At this point we assume that the chosen_action has been updated in Q_support_params
+def helper_update_Q_df(Q_df, Q_support_params,dpmndefaults,trial_num): 
+    print("In update_Q_df") 
 
-    return actionchannels_modified
+    Q_support_params = untrace(Q_support_params)
+    #Q_df = untrace(Q_df)
+    
+    print("Q_support_params")
+    print(Q_support_params)
+    print("Q_df")
+    print(Q_df)
+    print("trial_num",trial_num)
+    trial_wise_q_df = Q_df.iloc[trial_num] # is this the convention ?, or start with trial_num=0
+    trial_wise_chosen_action = Q_support_params.chosen_action
+    
+    u_val = sp_st.uniform.pdf(Q_support_params.reward_value ,Q_support_params.bayes_unif_min, Q_support_params.bayes_unif_max)
+
+      
+    #q_val_chosen = trial_wise_q_df.loc[trial_wise_q_df["action"]==trial_wise_chosen_action]["Q_val"]
+    q_val_chosen = trial_wise_q_df[trial_wise_chosen_action]
+    
+    n_val = sp_st.norm.pdf(Q_support_params.reward_value, q_val_chosen, Q_support_params.bayes_sF)
+    
+    bayes_CPP = (u_val * Q_support_params.bayes_H) / ((u_val * Q_support_params.bayes_H) + (n_val * (1 - Q_support_params.bayes_H)))
+
+    q_error = Q_support_params.reward_value - q_val_chosen.values
+   
+    q_val_updated = q_val_chosen.values + Q_support_params.q_alpha.values * q_error
+        
+    # Copy the updated q value back into thie Q data frame
+    
+    
+    # First append an empty dataframe for the new trial
+    #Q_df = Q_df.append({na:Q_df  for na in list(Q_df.columns)},ignore_index=True) # Replace nan with previous trial Q-value
+    # Duplicate the last row of df
+    new_data = pd.DataFrame(Q_df[-1:].values, columns=Q_df.columns)
+    Q_df = Q_df.append(new_data)
+    # Update the correct value with q_val_updated
+    Q_df.iloc[trial_num+1][trial_wise_chosen_action] = q_val_updated
+
+
+    dpmndefaults.dpmn_DAp = q_error * bayes_CPP * Q_support_params.dpmn_CPP_scale
+    print("====================================================================")
+    print("Q_support_params")
+    print(Q_support_params)
+
+    print("Q_df")
+    print(Q_df)
+
+    print("dpmndefaults")
+    print(dpmndefaults)
+
+    return Q_df, Q_support_params, dpmndefaults
+    #return dpmndefaults, #Q_support_params
+    
+    
+    
+    
+    
