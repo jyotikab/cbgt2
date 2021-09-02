@@ -5,6 +5,40 @@ import pdb
 import numpy as np
 import scipy.stats as sp_st
 
+
+# ----------------------  helper_cellparams FUNCTION  --------------------
+# helper_cellparams sets the neuron parameters with either the defaults or
+# the values passed as arguments
+
+# inputs:   params = neuronal parameters sent as argument. This is a dataframe and allows setting only a subset of the parameters
+#           N : number of receptors on the neuron
+#           C : capacitance in nF
+#           Taum : membrane time constant in ms
+#           RestPot : Neuron rest potential in mV
+#           ResetPot : Neuron reset potential in mV
+#           Threshold : Neuron threshold potential in mV
+#           RestPot_ca : Rest potential for calcium ions
+#           Alpha_ca : Amount of increment of [Ca] with each spike discharge. (muM)
+#           Tau_ca : Time constant of Ca related conductance
+#           Eff_ca : Ca efficacy
+#           tauhm : Duration of the burst in ms
+#           tauhp : Duration of hyperpolarization necessary to recruit a maximal postinhibitory rebound response in ms.
+#           V_h :  Threshold for activation of bursts in mV.
+#           V_T :  low-threshold Ca^2+ reversal potential in mV
+#           g_T : low-threshold Ca^2+ maximal conductance  in mS/cm^2
+#           g_adr_max : Maximum value of the g
+#           Vadr_h : Potential for g_adr=0.5g_adr_max
+#           Vadr_s : Slop of g_adr at Vadr_h, defining how sharp the shape of g_ard is
+#           ADRRevPot : Reverse potential for ADR
+#           g_k_max :  Maximun outward rectifying current
+#           Vk_h : Potential for g_k=0.5g_k_max
+#           Vk_s : Slop of g_k at Vk_h, defining how sharp the shape of g_k is
+#           tau_k_max : maximum tau for outward rectifying k current
+#           n_k :  gating variable for outward rectifying K channel
+#           h :  gating variable for the low-threshold Ca^2+ current
+# outputs:  celldefaults = neuron parameters, which are either default
+# values or values set by params
+
 def helper_cellparams(params=None):
 
     celldefaults = ParamSet('celldefaults', {'N': 75,
@@ -34,10 +68,28 @@ def helper_cellparams(params=None):
                                              'h': 1, })
 
     if params is not None:
-        
+
         celldefaults = ModifyViaSelector(celldefaults, params)
-        
+
     return celldefaults
+
+
+# ----------------------  helper_popspecific FUNCTION  -------------------
+# helper_popspecific sets the population specific parameters with either
+# the defaults or the values passed as arguments
+
+# inputs:   pops = population parameters sent as argument. This is a dictionary and allows setting only a subset of the parameters
+#           LIP:  Lateral intraparietal cortex
+#           FSI: Striatal fast-spiking interneurons,
+#           GPeP: prototypical-external Globus Pallidus
+#           STNE: subthalamic nucleus (STN)
+#           LIPI:  lateral intraparietal cortex interneurons
+#           Th: Thalamus,
+#           N = number of neurons
+#           C = Capacitance in nF
+#           Taum = membrane time constant in ms
+#           g_T =  low-threshold Ca^2+ maximal conductance in mS/cm^2
+# outputs:  popspecific = population specific parameters dictionary
 
 
 def helper_popspecific(pops=dict()):
@@ -58,6 +110,20 @@ def helper_popspecific(pops=dict()):
     return popspecific
 
 
+# ----------------------  helper_receptor FUNCTION  ----------------------
+# helper_receptor sets the receptor specific parameters with either the
+# defaults or the values passed as arguments
+
+# inputs:   receps = receptor parameters sent as argument. This is a dataframe and allows setting only a subset of the parameters
+#           Tau_AMPA: Time constant AMPA
+#           RevPot_AMPA: Reversal potential, AMPA
+#           Tau_GABA: Time constant GABA
+#           RevPot_GABA: Reversal potential, GABA
+#           Tau_NMDA: Time constant NMDA
+#           RevPot_NMDA: Reversal potential, NMDA
+# outputs:  receptordefaults = receptor specific parameters dictionary
+
+
 def helper_receptor(receps=None):
 
     receptordefaults = ParamSet('receptordefaults', {'Tau_AMPA': 2,
@@ -71,6 +137,21 @@ def helper_receptor(receps=None):
         receptordefaults = ModifyViaSelector(receptordefaults, receps)
 
     return receptordefaults
+
+
+# ----------------------  helper_basestim FUNCTION  ----------------------
+# helper_basestim sets the baseline stimulation parameters for all the
+# populations with either the defaults or the values passed as arguments
+
+# inputs:   base = baseline stimulation parameters sent as argument. This is a dictionary and allows setting only a subset of the parameters
+#           Each population has three stimulation parameters:
+#           FreqExt_AMPA: Input firing rate to AMPA receptors
+#           MeanExtEff_AMPA: AMPA conductance
+#           MeanExtCon_AMPA:  AMPA connection Probability
+#           FreqExt_GABA: Input firing rate to GABA receptors
+#           MeanExtEff_GABA: GABA conductance
+#           MeanExtCon_GABA:  GABA connection Probability
+# outputs:  basestim = base stimulus parameter dictionary
 
 
 def helper_basestim(base=dict()):
@@ -107,7 +188,7 @@ def helper_basestim(base=dict()):
         'MeanExtEff_AMPA': 4,
         'MeanExtCon_AMPA': 800},
         'LIP': {
-        'FreqExt_AMPA': 2.2,
+        'FreqExt_AMPA': 2.5, # 2.2
         'MeanExtEff_AMPA': 2,
         'MeanExtCon_AMPA': 800},
         'Th': {
@@ -121,6 +202,33 @@ def helper_basestim(base=dict()):
                 basestim[key][item] = base[key][item]
 
     return basestim
+
+# ----------------------  helper_dpmn FUNCTION  ----------------------------
+# helper_dpmn sets dopamine related parameters with either the defaults or
+# the values passed as arguments
+
+# inputs:   dpmns = dopamine related parameters sent as argument. This is a dataframe and allows setting only a subset of the parameters
+#           dpmn_tauDOP:
+#           dpmn_alpha: learning rate
+#           dpmn_DAt: tonic dopamine
+#           dpmn_taum: decay of motivation
+#           dpmn_dPRE: fixed increment to the pre-synaptic spiking (Apre)
+#           dpmn_dPOST: fixed increment to the post-synaptic spiking (Apre)
+#           dpmn_tauE: eligibility trace decay
+#           dpmn_tauPRE: decay time constant for the pre-synaptic spiking (Apre)
+#           dpmn_tauPOST: decay time constant for the post-synaptic spiking (Apost)
+#           dpmn_wmax: upper bound for the weight w
+#           dpmn_w: synaptic weight added to the synaptic conductance during learning
+#           dpmn_Q1: expected reward of action 1
+#           dpmn_Q2: expected reward of action 2
+#           dpmn_m: motivation, modulates strength of dopamne level
+#           dpmn_E: eligibility trace
+#           dpmn_DAp: phasic dopamine
+#           dpmn_APRE: pre-synaptic spiking
+#           dpmn_APOST: post-synaptic spiking
+#           dpmn_XPRE: pre-synaptic spike time indicators
+#           dpmn_XPOST: post-synaptic spike time indicators
+# outputs:  dpmndefaults = dopamine realted parameter dictionary
 
 
 def helper_dpmn(dpmns=None):
@@ -151,6 +259,18 @@ def helper_dpmn(dpmns=None):
 
     return dpmndefaults
 
+# ----------------------  helper_d1 FUNCTION  ----------------------------
+# helper_d1 sets dopamine related parameters for D1-MSN population with
+# either the defaults or the values passed as arguments
+
+# inputs:   d1 = dopamine related parameters for D1-MSNs sent as argument. This is a dataframe and allows setting only a subset of the parameters
+#           dpmn_type: 0 = none, 1 = D1, 2 = D2
+#           dpmn_alphaw: for weight
+#           dpmn_a: parameter for f(DA)
+#           dpmn_b: parameter for f(DA)
+#           dpmn_c: parameter for f(DA)
+# outputs:  d1defaults = dopmaine related parameter for D1-MSN
+
 
 def helper_d1(d1=None):
 
@@ -163,6 +283,18 @@ def helper_d1(d1=None):
         d1defaults = ModifyViaSelector(d1defaults, d1)
 
     return d1defaults
+
+# ----------------------  helper_d2 FUNCTION  ----------------------------
+# helper_d2 sets dopamine related parameters for D2-MSN population with
+# either the defaults or the values passed as arguments
+
+# inputs:   d2 = dopamine related parameters for D2-MSNs sent as argument. This is a dataframe and allows setting only a subset of the parameters
+#           dpmn_type: 0 = none, 1 = D1, 2 = D2
+#           dpmn_alphaw: for weight
+#           dpmn_a: parameter for f(DA)
+#           dpmn_b: parameter for f(DA)
+#           dpmn_c: parameter for f(DA)
+# outputs:  d2defaults = dopmaine related parameter for D1-MSN
 
 
 def helper_d2(d2=None):
@@ -177,135 +309,20 @@ def helper_d2(d2=None):
 
     return d2defaults
 
+# ----------------------  helper_actionchannels FUNCTION  ----------------
+# helper_actionchannels sets action channel parameters  with either the
+# defaults or the values passed as arguments
+
+# inputs:   channels = action channels related parameters sent as argument. This is a dataframe and allows setting only a subset of the parameters
+#           action: [ x, y, ...] - number of channels with x, y.. as channel labels. These become the column names in the final network data frame and can be used to access information about the action channels
+# outputs:  actionchannels = dictionary with action channels information
+
 
 def helper_actionchannels(channels=None):
-    
-    actionchannels = ParamSet('actionchannels', {'action': [1, 2]},  )
+
+    actionchannels = ParamSet('helper_actionchannels', {'action': [1, 2]},)
 
     if channels is not None:
         actionchannels = ModifyViaSelector(actionchannels, channels)
-    
+
     return actionchannels
-
-# At some point we have to replace one variable/action(eg t1_epochs, t2_epochs ) by a single data structure. 
-# Change this function accordingly. We also have to decide if the format is n_trials x channels or the otherway round
-
-# And maybe this function does not belong in init_params.py. It felt too specific for frontendhelpers.py too. Find a place
-def get_reward_value(t1_epochs,t2_epochs,chosen_action,trial_num):
-    print("get_reward_value")
-    rew_epochs = np.vstack((t1_epochs,t2_epochs)).T
-    
-    
-    # Assuming a n_trials x channels array, ideally this should be a data frame ? so that we do not have to convert chosen action to index chosen_action-1
-    reward_val = rew_epochs[trial_num][chosen_action-1]
-    print(reward_val)
-    return reward_val
-    
-
-# Change the reward_value, chosen action to arrays, trial numbers
-def helper_init_Q_support_params(q_support=None):
-    print("helper_init_Q_support_params")
-    Q_support_params = ParamSet('Q_support_params',{'bayes_unif_min':0.,'bayes_unif_max':2.0, 'bayes_H':0.05, 'bayes_sF':1.25, 'q_alpha': 0.45, 'dpmn_CPP_scale':15.,'reward_value' :-1., 'chosen_action': 1})
-    
-    if q_support is not None:
-        Q_support_params = ModifyViaSelector(Q_support_params,q_support)
-    
-    print(Q_support_params)
-    return Q_support_params
-
-def helper_update_Q_support_params(Q_support_params,reward_val,chosen_action):
-    print("helper_update_Q_support_params")
-    Q_support_params = untrace(Q_support_params)
-    
-    Q_support_params.reward_value = reward_val
-    Q_support_params.chosen_action = chosen_action
-    
-    print(Q_support_params)
-    return Q_support_params
-    
-# Q_df should have columns are actions, rows are trial numbers
-def helper_init_Q_df(actionchannels,q_df=None):
-    print("helper_init_Q_df")
-    # q_df should be a n_trial+1 x action channels array
-    # Start with only dataframe an merge with a new one every trial number - merge that in update Q_df
-    # Another Q_val function to initialize the q_val specifically, whether it is same for all actions or not, 0.5
-    
-    num_actions = len(actionchannels["action"])
-    print("num_actions",num_actions)
-    Q_df = pd.DataFrame(columns=[actionchannels.iloc[na]["action"] for na in np.arange(num_actions)])
-    print("Q_df",Q_df)
-    Q_df = Q_df.append({actionchannels.iloc[na]["action"]:0.5 for na in np.arange(num_actions)},ignore_index=True)
-    print("Q_df",Q_df)
-    # Different initial values for Q_df should be taken care when calling this function with q_df and non-None value
-    # eg. q_df = pd.DataFrame({1: 0.5, 2: 0.6})
-    
-    
-    if q_df is not None:
-        Q_df = pd.DataFrame(columns=[actionchannels.iloc[na]["action"] for na in np.arange(num_actions)])
-        print("Q_df",Q_df)
-        Q_df = Q_df.append({actionchannels.iloc[na]["action"]:0.5 for na in np.arange(num_actions)},ignore_index=True)
-
-        Q_df = ModifyViaSelector(Q_df,q_df)
-    
-    return Q_df
-
-
-# At this point we assume that the chosen_action has been updated in Q_support_params
-def helper_update_Q_df(Q_df, Q_support_params,dpmndefaults,trial_num): 
-    print("In update_Q_df") 
-
-    Q_support_params = untrace(Q_support_params)
-    #Q_df = untrace(Q_df)
-    
-    print("Q_support_params")
-    print(Q_support_params)
-    print("Q_df")
-    print(Q_df)
-    print("trial_num",trial_num)
-    trial_wise_q_df = Q_df.iloc[trial_num] # is this the convention ?, or start with trial_num=0
-    trial_wise_chosen_action = Q_support_params.chosen_action
-    
-    u_val = sp_st.uniform.pdf(Q_support_params.reward_value ,Q_support_params.bayes_unif_min, Q_support_params.bayes_unif_max)
-
-      
-    #q_val_chosen = trial_wise_q_df.loc[trial_wise_q_df["action"]==trial_wise_chosen_action]["Q_val"]
-    q_val_chosen = trial_wise_q_df[trial_wise_chosen_action]
-    
-    n_val = sp_st.norm.pdf(Q_support_params.reward_value, q_val_chosen, Q_support_params.bayes_sF)
-    
-    bayes_CPP = (u_val * Q_support_params.bayes_H) / ((u_val * Q_support_params.bayes_H) + (n_val * (1 - Q_support_params.bayes_H)))
-
-    q_error = Q_support_params.reward_value - q_val_chosen.values
-   
-    q_val_updated = q_val_chosen.values + Q_support_params.q_alpha.values * q_error
-        
-    # Copy the updated q value back into thie Q data frame
-    
-    
-    # First append an empty dataframe for the new trial
-    #Q_df = Q_df.append({na:Q_df  for na in list(Q_df.columns)},ignore_index=True) # Replace nan with previous trial Q-value
-    # Duplicate the last row of df
-    new_data = pd.DataFrame(Q_df[-1:].values, columns=Q_df.columns)
-    Q_df = Q_df.append(new_data)
-    # Update the correct value with q_val_updated
-    Q_df.iloc[trial_num+1][trial_wise_chosen_action] = q_val_updated
-
-
-    dpmndefaults.dpmn_DAp = q_error * bayes_CPP * Q_support_params.dpmn_CPP_scale
-    print("====================================================================")
-    print("Q_support_params")
-    print(Q_support_params)
-
-    print("Q_df")
-    print(Q_df)
-
-    print("dpmndefaults")
-    print(dpmndefaults)
-
-    return Q_df, Q_support_params, dpmndefaults
-    #return dpmndefaults, #Q_support_params
-    
-    
-    
-    
-    

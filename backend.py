@@ -1,5 +1,7 @@
 import time
 import ray
+from tqdm import tqdm
+import numpy as np
 
 if not ray.is_initialized():
     ray.init(address='auto', _redis_password='cbgt2', include_dashboard=False)
