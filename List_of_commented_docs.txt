@@ -1,0 +1,29 @@
+(1) ALREADY COMMENTED
+
+- generateepochs.py  (CATI - Needs some info from Matt about some variables that can be removed. Cristina: Do you remember the meaning of volatile_pattern?)
+- init_params.py
+- popconstruct_copy.py 
+-qvalues.py
+
+
+(2) WORKING ON
+
+
+
+(3) NOT COMMENTED
+
+* PYTHON FILES
+- frontendhelpers.py
+- tracetype.py
+- phaseAsegment2.py
+- backend.py
+- agentmatrixinit.py
+- cbgt.py
+
+
+* NOTEBOOKS
+- test_Q_df_update.ipynb
+- test_rewards_q_value_update.ipynb
+- test_phaseA_segment1_pipeline.ipynb - CG same as the below one
+- test_segment1_pipeline.ipynb 
+- testbench01.ipynb 
