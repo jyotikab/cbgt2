@@ -22,15 +22,17 @@ import scipy.stats as sp_st
 # specific for frontendhelpers.py too. Find a place
 
 
-def get_reward_value(t1_epochs, t2_epochs, chosen_action, trial_num):
+#def get_reward_value(t1_epochs, t2_epochs, chosen_action, trial_num):
+def get_reward_value(t_epochs, chosen_action, trial_num):
 
-    rew_epochs = np.vstack((t1_epochs, t2_epochs)).T
+    #rew_epochs = np.vstack((t1_epochs, t2_epochs)).T
 
     # Assuming a n_trials x channels array
 
     # chosen_action - 1  because, action labels start from 1, but the index in
     # the reward array should start from 0
-    reward_val = rew_epochs[trial_num][chosen_action - 1]
+    #reward_val = rew_epochs[trial_num][chosen_action - 1]
+    reward_val = t_epochs.iloc[trial_num][chosen_action]
     # print(reward_val)
     return reward_val
 
