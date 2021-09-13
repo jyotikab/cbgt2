@@ -552,7 +552,10 @@ def untrace(data):
         return [x.val for x in data]
     if isinstance(data, pd.DataFrame):
         return trace(data,None).applymap(lambda x: x.val)
-    return data.val
+    try:
+        return data.val
+    except:
+        return data
 
 
 def gettrace(data):

@@ -97,6 +97,7 @@ def helper_update_Q_support_params(
 
 def helper_init_Q_df(actionchannels, q_df=None):
 
+    print(actionchannels)
     num_actions = len(actionchannels["action"])
     # print("num_actions", num_actions)
     Q_df = pd.DataFrame(
