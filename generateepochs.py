@@ -1,7 +1,7 @@
 
 import numpy as np
 import random
-
+import pandas as pd
 
 # ----------------------  define_reward FUNCTION  ----------------------------
 # define_reward function builds different arrays reward, one per each
@@ -21,8 +21,8 @@ import random
 # reward_t2 = array of n_trial length containing the amount of the reward
 # associated to action t2. Each position on the array stands for a
 # different trial
-def define_reward(opt_p, n_trials=100, reward_mu=1, reward_std=0):
-
+def define_reward(opt_p,  actionchannels, n_trials=100, reward_mu=1, reward_std=0):
+    #print(actionchannels)
     trial_index = np.arange(n_trials)
 
     # define suboptimal choice reward probability
@@ -44,13 +44,19 @@ def define_reward(opt_p, n_trials=100, reward_mu=1, reward_std=0):
     subopt_reward_idx = np.setxor1d(trial_index, opt_reward_idx)
 
     # intialize reward vectors
-    reward_t1, reward_t2 = np.zeros((n_trials)), np.zeros((n_trials))
+    reward = np.zeros((n_trials, len(actionchannels)))
+    #reward_t1, reward_t2 = np.zeros((n_trials)), np.zeros((n_trials))
 
     # assign rewards
-    reward_t1[opt_reward_idx] = reward_values[opt_reward_idx]
-    reward_t2[subopt_reward_idx] = reward_values[subopt_reward_idx]
-
-    return reward_t1, reward_t2
+    reward[opt_reward_idx, 0] = reward_values[opt_reward_idx]
+    #reward_t1[opt_reward_idx] = reward_values[opt_reward_idx]
+    #reward_t2[subopt_reward_idx] = reward_values[subopt_reward_idx]
+    reward[subopt_reward_idx, 1] = reward_values[subopt_reward_idx]
+        
+    reward = pd.DataFrame(reward)
+    reward = reward.rename(columns = {0 : actionchannels.iloc[0]["action"], 1: actionchannels.iloc[1]["action"]})
+    
+    return reward #reward_t1, reward_t2
 
 
 # ----------------------  define_changepoints FUNCTION  ------------------
@@ -70,7 +76,7 @@ def define_reward(opt_p, n_trials=100, reward_mu=1, reward_std=0):
 # cp_indicator = array of length n_trials to track wether there is a
 # change point (1) or not (0)
 
-def define_changepoints(n_trials, reward_t1, reward_t2, cp_lambda):
+def define_changepoints(n_trials, cp_lambda):  #reward_t1, reward_t2,
 
     # find approximate number of change points
     n_cps = int(n_trials / cp_lambda)
@@ -115,10 +121,17 @@ def define_changepoints(n_trials, reward_t1, reward_t2, cp_lambda):
 #           noisy_pattern = array of n_trials length where each position i contains if the delivered reward at trial i is considered to be noise (reward value) or not (1). We consider noise if the reward value is smaller than 1e-5
 # volatile_pattern =  list of n trials indicating which action (0 or 1) is
 # the best action for that epoch
-def define_epochs(n_trials, reward_t1, reward_t2, cp_idx, opt_p):
 
+def define_epochs(n_trials, reward, cp_idx, opt_p, actionchannels):  #reward_t1, reward_t2,
+    
+    #print("define_epochs")
+    #print(actionchannels)
+    #print("reward",reward)
     t1_epochs = []
     t2_epochs = []
+    reward_t1 = np.array(reward[actionchannels.iloc[0]['action']])
+    reward_t2 = np.array(reward[actionchannels.iloc[1]['action']])
+    
 
     epoch_number = []
     epoch_trial = []
@@ -183,19 +196,25 @@ def define_epochs(n_trials, reward_t1, reward_t2, cp_idx, opt_p):
     #p_id_solution = np.hstack(p_id_solution)
     volatile_pattern = np.hstack(volatile_pattern)
     noisy_pattern = [min([.00001, abs(x)]) * 100000 for x in t1_epochs]
+    
+    t_epochs = pd.DataFrame()
+    t_epochs[actionchannels.iloc[0]['action']] = t1_epochs
+    t_epochs[actionchannels.iloc[1]['action']] = t2_epochs
     # volatile_pattern = [x%2 for x in epoch_number] - if we need to compute
     # epoch_number
 
-    # , epoch_number, reward_p, p_id_solution
-    return t1_epochs, t2_epochs, noisy_pattern, volatile_pattern
+    # , epoch_number, reward_p, p_id_solution, t1_epochs, t2_epochs,
+    return  t_epochs, noisy_pattern, volatile_pattern
 
 
-def GenRewardSchedule(n_trials, volatility, conflict, reward_mu, reward_std):
-
-    reward_t1, reward_t2 = define_reward(
-        conflict, n_trials, reward_mu, reward_std)
+def GenRewardSchedule(n_trials, volatility, conflict, reward_mu, reward_std, actionchannels):
+    
+    #reward_t1, reward_t2
+    reward = define_reward(
+        conflict, actionchannels, n_trials, reward_mu, reward_std)
     cp_idx, cp_indicator = define_changepoints(
-        n_trials, reward_t1, reward_t2, volatility)
-    t1_epochs, t2_epochs, noisy_pattern, volatile_pattern = define_epochs(
-        n_trials, reward_t1, reward_t2, cp_idx, conflict)
-    return volatile_pattern, cp_idx, cp_indicator, noisy_pattern, t1_epochs, t2_epochs
+        n_trials, volatility)
+    #t1_epochs, t2_epochs
+    t_epochs, noisy_pattern, volatile_pattern = define_epochs(
+        n_trials, reward, cp_idx, conflict, actionchannels) #reward_t1, reward_t2
+    return volatile_pattern, cp_idx, cp_indicator, noisy_pattern, t_epochs #t1_epochs, t2_epochs

@@ -323,6 +323,8 @@ def helper_actionchannels(channels=None):
     actionchannels = ParamSet('helper_actionchannels', {'action': [1, 2]},)
 
     if channels is not None:
-        actionchannels = ModifyViaSelector(actionchannels, channels)
-
+        #actionchannels = ModifyViaSelector(actionchannels, channels)
+        actionchannels = channels
+    #else:
+    #    actionchannels = ParamSet('helper_actionchannels', {'action': [1, 2]},)
     return actionchannels
