@@ -563,4 +563,7 @@ def gettrace(data):
         return [x.meta for x in data]
     if isinstance(data, pd.DataFrame):
         return trace(data,None).applymap(lambda x: x.meta)
-    return data.meta
+    try:
+        return data.meta
+    except:
+        return data
