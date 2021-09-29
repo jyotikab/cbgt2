@@ -130,7 +130,7 @@ def NamePathwaySelector(srcname, destname, matchprops=[]):
 
 def FillGridSelection(grid, df, biselector, fillvalue):
     # fill a grid dataframe with a specific value when the row/column fulfills the biselector's condition
-    #   - used to fill in efficacies and connection probabilities between source and destination populations
+    #   - is used to fill in efficacies and connection probabilities between source and destination populations
     grid = grid.copy()
     validselector = False
     for idx1, row1 in df.iterrows():

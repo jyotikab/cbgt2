@@ -1,7 +1,8 @@
 import time
 import ray
-from tqdm import tqdm
-import numpy as np
+
+import pickle
+import pandas as pd
 
 if not ray.is_initialized():
     ray.init(address='auto', _redis_password='cbgt2', include_dashboard=False)
@@ -430,12 +431,71 @@ class ExecutionManager:
             self.funcqueue.pop(index)
             self.envqueue.pop(index)
 
-    def run(self, pipeline, environment={}):
-        rootid = self.spawnThreadManager(pipeline, environment)
+    def run(self, pipelines, environments={}):
+
+        listform = True
+        if not isinstance(pipelines, list) and not isinstance(environments, list):
+            listform = False
+        if not isinstance(pipelines, list):
+            pipelines = [pipelines]
+        if not isinstance(environments, list):
+            environments = [environments]
+
+        if len(pipelines) == 1:
+            pipelines = pipelines * len(environments)
+        if len(environments) == 1:
+            environments = environments * len(pipelines)
+
+        rootids = []
+        for i in range(len(pipelines)):
+            rootids.append(self.spawnThreadManager(pipelines[i], environments[i]))
 
         self.cyclethrough()
-        while self.idtostatus[rootid] != 'finished':
+        while not self.allfinished(rootids):
             self.consumeQueue()
             self.cyclethrough()
 
-        return self.idtothreadmanager[rootid].variables
+        results = [self.idtothreadmanager[rootid].variables for rootid in rootids]
+        if listform:
+            return results
+        else:
+            return results[0]
+
+
+    def allfinished(self, rootids):
+        for rootid in rootids:
+            if self.idtostatus[rootid] != 'finished':
+                return False
+        return True
+
+def saveResults(results,prefix,varnames):
+
+    saveddatas = []
+
+    for result in results:
+        saveddata = {}
+        for varname in varnames:
+            saveddata[varname] = result[varname]
+        saveddatas.append(saveddata)
+
+    pickle.dump(saveddatas, open(prefix, "wb"))
+
+def loadResults(prefix):
+    return pickle.load(open(prefix, "rb"))
+
+def comparisonTable(results,varnames):
+
+    if not isinstance(results,list):
+        results = [results]
+
+    table = pd.DataFrame([],columns=varnames)
+
+    for result in results:
+        row = pd.DataFrame([[result[varname] for varname in varnames]],columns=varnames)
+        table = pd.concat([table,row],ignore_index=True)
+    return table
+
+def collateVariable(results,varname):
+    if not isinstance(results,list):
+        results = [results]
+    return [result[varname] for result in results]

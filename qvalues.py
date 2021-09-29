@@ -97,7 +97,7 @@ def helper_update_Q_support_params(
 
 def helper_init_Q_df(actionchannels, q_df=None):
 
-    print(actionchannels)
+    #print(actionchannels)
     num_actions = len(actionchannels["action"])
     # print("num_actions", num_actions)
     Q_df = pd.DataFrame(
@@ -162,18 +162,26 @@ def helper_update_Q_df(Q_df, Q_support_params, dpmndefaults, trial_num):
                                                        Q_support_params.bayes_H) + (n_val * (1 - Q_support_params.bayes_H)))
 
     # error = reward_calue - current q-value
-    q_error = Q_support_params.reward_value - q_val_chosen.values
+    q_error = Q_support_params.reward_value.values - q_val_chosen.values
+    #print('Q_support_params.REWARD_VALUE', type(Q_support_params.reward_value))
+    #print('Q_support_params type', type(Q_support_params))
 
     # Update the current q-value accordingly
     q_val_updated = q_val_chosen.values + Q_support_params.q_alpha.values * q_error
+    #print('qvalUPDATED', type(q_val_updated))
 
     # First append an dataframe for the new trial, with q-values copied from
     # the previous trial
     new_data = pd.DataFrame(Q_df[-1:].values, columns=Q_df.columns)
+    #print('newdata', new_data)
     Q_df = Q_df.append(new_data)
+    #print('newQdf', Q_df)
+    
     # Update the correct value with q_val_updated
     Q_df.iloc[trial_num + 1][trial_wise_chosen_action] = q_val_updated
-
+    #print('Qdf', Q_df)
+    #print('Qdf data types', Q_df.dtypes)
+    
     # update dopamine burst ?
     dpmndefaults.dpmn_DAp = q_error * bayes_CPP * Q_support_params.dpmn_CPP_scale
 

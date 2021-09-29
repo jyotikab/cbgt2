@@ -1,5 +1,5 @@
 
-# 1: IMPORTING SCRIPTS
+# 1. IMPORTING SCRIPTS
 
 import cbgt as cbgt
 from frontendhelpers import * 
@@ -13,8 +13,10 @@ from agent_timestep import timestep_mutator, multitimestep_mutator
 import mega_loop as ml
 
 
-# 2: NETWORK PIPELINE
-# 2.1: Defining necessary codeblocks:
+
+# 2. NETWORK PIPELINE
+
+# 2.1. Defining necessary codeblocks:
 
 #MODIFIERS:
 
@@ -66,6 +68,8 @@ def codeblock_init_Q_df(self):
 def codeblock_update_Q_df(self):
     self.Q_df, self.Q_support_params, self.dpmndefaults = qval.helper_update_Q_df(self.Q_df, self.Q_support_params, self.dpmndefaults,pl.trial_num)
 
+
+# 2.2 Create reward pipeline 
     
 def create_reward_pipeline(pl):
     rsg = cbgt.Pipeline() #rsg is short for 'reward schedule generator'
@@ -80,12 +84,13 @@ def create_reward_pipeline(pl):
     ).shape(5)
     
     return rsg
+
+# 2.3 Create q-values pipeline 
+
+def create_q_val_pipeline(pl): 
     
-def create_q_val_pipeline(pl):
-    #Creating a new pipeline for Q-values: 
     q_val_pipe = cbgt.Pipeline()
 
-    
     #Defining necessary function modules: 
     #qvalues.py
     q_val_pipe.Q_support_params = q_val_pipe[qval.helper_init_Q_support_params]()
@@ -96,8 +101,10 @@ def create_q_val_pipeline(pl):
     #(q_val_pipe.Q_df, q_val_pipe.Q_support_params, pl.dpmndefaults) = q_val_pipe[qval.helper_update_Q_df](q_val_pipe.Q_df,q_val_pipe.Q_support_params,pl.dpmndefaults,pl.trial_num).shape(3)
     return q_val_pipe
     
-# 2.2: CREATE CBGT PIPELINE    
+# 3. CREATE CBGT PIPELINE - MAIN
+
 def create_main_pipeline():
+    
     pl = cbgt.Pipeline()
     pl.add(codeblock_modifyactionchannels)
     

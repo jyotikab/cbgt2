@@ -87,12 +87,15 @@ def helper_poppathways(popdata, newpathways=None):
     if newpathways is None:
         newpathways = pd.DataFrame()
 
+    dpmn_ratio = 0.5
+    dpmn_implied = 0.7
+
     simplepathways = pd.DataFrame(
         [
-            ['LIP', 'D1STR', 'AMPA', 'syn', 1, 0.027, True],
-            ['LIP', 'D1STR', 'NMDA', 'syn', 1, 0.027, False],
-            ['LIP', 'D2STR', 'AMPA', 'syn', 1, 0.027, True],
-            ['LIP', 'D2STR', 'NMDA', 'syn', 1, 0.027, False],
+            ['LIP', 'D1STR', 'AMPA', 'syn', 1, 0.027 * dpmn_ratio / dpmn_implied, True],
+            ['LIP', 'D1STR', 'NMDA', 'syn', 1, 0.027 * (1 - dpmn_ratio), False],
+            ['LIP', 'D2STR', 'AMPA', 'syn', 1, 0.027 * dpmn_ratio / dpmn_implied, True],
+            ['LIP', 'D2STR', 'NMDA', 'syn', 1, 0.027 * (1 - dpmn_ratio), False],
             ['LIP', 'FSI', 'AMPA', 'all', 1, 0.198, False],
             ['LIP', 'Th', 'AMPA', 'all', 1, 0.035, False],
             ['LIP', 'Th', 'NMDA', 'all', 1, 0.035, False],

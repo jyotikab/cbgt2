@@ -22,7 +22,7 @@ import pandas as pd
 # associated to action t2. Each position on the array stands for a
 # different trial
 def define_reward(opt_p,  actionchannels, n_trials=100, reward_mu=1, reward_std=0):
-    print(actionchannels)
+    #print(actionchannels)
     trial_index = np.arange(n_trials)
 
     # define suboptimal choice reward probability
@@ -123,9 +123,10 @@ def define_changepoints(n_trials, cp_lambda):  #reward_t1, reward_t2,
 # the best action for that epoch
 
 def define_epochs(n_trials, reward, cp_idx, opt_p, actionchannels):  #reward_t1, reward_t2,
-    print("define_epochs")
-    print(actionchannels)
-    print("reward",reward)
+    
+    #print("define_epochs")
+    #print(actionchannels)
+    #print("reward",reward)
     t1_epochs = []
     t2_epochs = []
     reward_t1 = np.array(reward[actionchannels.iloc[0]['action']])
