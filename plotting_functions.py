@@ -40,7 +40,8 @@ def plot_fr(results):
     
     results_local_melt["nuclei"] = [ x.split('_')[0]  for x in results_local_melt["variable"]]
     results_local_melt["channel"] = [ x.split('_')[1]  for x in results_local_melt["variable"]]
-    print(results_local_melt)
-    g1 = sns.relplot(x="Time (ms)", y ="value", hue="channel",col="nuclei",data=results_local_melt,col_wrap=3,kind="line",facet_kws={'sharey': False, 'sharex': True})
+    #print(results_local_melt)
+    results_local_melt = results_local_melt.rename(columns={"value":"firing_rate"})
+    g1 = sns.relplot(x="Time (ms)", y ="firing_rate", hue="channel",col="nuclei",data=results_local_melt,col_wrap=3,kind="line",facet_kws={'sharey': False, 'sharex': True})
     g1.fig.savefig(figure_dir+'ActualFR.png', dpi=400)
     
