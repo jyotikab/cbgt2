@@ -1,0 +1,2 @@
+ray start --head --port=6379 --redis-password="cbgt2"
+ray start --address='10.0.0.154:6379' --redis-password='cbgt2'

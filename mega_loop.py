@@ -11,7 +11,6 @@ from agentmatrixinit import *
 from agent_timestep import timestep_mutator, multitimestep_mutator
 import pipeline_creation as pl_creat
 
-
 # 2. TIMESTEP LOOP
 
 def mega_loop(self):
@@ -44,7 +43,6 @@ def mega_loop(self):
     agent.out_popids = np.where(popdata['name'] == 'Th')[0]
 
     presented_stimulus = 1
-
     self.chosen_action = None
 
     for action_idx in range(len(actionchannels)):
@@ -74,7 +72,6 @@ def mega_loop(self):
             agent.FreqExt_AMPA[popid] = np.ones(len(agent.FreqExt_AMPA[popid])) * agent.ramping_extstim[action_idx]
         multitimestep_mutator(agent,popdata,5)
         agent.phasetimer += 1 # 1 ms = 5 * dt
-
         agent.globaltimer += 1 # 1 ms = 5 * dt
         agent.FRs = np.concatenate((agent.FRs,[agent.rollingbuffer.mean(1) / untrace(list(popdata['N'])) / agent.dt * 1000]))
 
@@ -82,7 +79,6 @@ def mega_loop(self):
             gateFRs = agent.rollingbuffer[agent.out_popids].mean(1) / untrace(list(popdata['N'][agent.out_popids])) / agent.dt * 1000
             thresholds_crossed = np.where(gateFRs > 30)[0]
             if len(thresholds_crossed) > 0 or agent.phasetimer > 1000:
-
 
                 print('phasetimer',agent.phasetimer)
                 print('globaltimer',agent.globaltimer)
@@ -104,7 +100,6 @@ def mega_loop(self):
         if agent.phase == 1:
             if agent.phasetimer > 100:
                 agent.phase = 2
-
                 print('phasetimer',agent.phasetimer)
                 print('globaltimer',agent.globaltimer)
                 agent.phasetimer = 0
@@ -121,7 +116,6 @@ def mega_loop(self):
 
         if agent.phase == 2:
             if agent.phasetimer > 100:
-
                 self.dpmndefaults['dpmn_DAp'] = 0
                 self.trial_num += 1
                 agent.phase = 0
