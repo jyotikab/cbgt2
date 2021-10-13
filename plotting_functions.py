@@ -10,6 +10,7 @@ from agent_timestep import timestep_mutator, multitimestep_mutator
 import pipeline_creation as pl_creat
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pylab as pl
 
 figure_dir = "./Figures/"
 
@@ -66,3 +67,27 @@ def plot_fr(results,smooth=False):
     else:
         g1.fig.savefig(figure_dir+'ActualFR.png', dpi=400)
     
+def plot_reward_and_Q_df(t_epochs,Q_df):
+    Q_df_local = Q_df.copy()
+    Q_df_local = Q_df_local.reset_index()
+    Q_df_local.index-=1
+    Q_df_local["Trials"] = Q_df_local.index
+    Q_df_local = Q_df_local.melt("Trials")
+    Q_df_local = Q_df_local.loc[Q_df_local["variable"]!= "index"]
+    Q_df_local = Q_df_local.reset_index()
+    Q_df_local["data_type"] = "Q_df"
+    
+    rew_df = t_epochs.copy()
+    rew_df["Trials"] = t_epochs.index
+    rew_df = rew_df.melt("Trials")
+    rew_df["data_type"] = "reward_df"
+    
+    final_data = Q_df_local.append(rew_df)
+
+    g1 = sns.catplot(x="Trials",y="value",hue="variable",col="data_type",data=final_data,kind='point')
+    for x in g1.axes[0]:
+        x.set_xticklabels(x.get_xticklabels(),fontsize=10,fontweight='bold')
+    xlim = g1.axes[0][0].get_xlim()
+    g1.axes[0][0].hlines(y=0.5,xmin=xlim[0],xmax=xlim[1],ls='dashed',color='k',lw=2.0)
+    
+    g1.fig.savefig(figure_dir+"Reward_and_Q_df.png")

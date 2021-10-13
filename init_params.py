@@ -188,7 +188,7 @@ def helper_basestim(base=dict()):
         'MeanExtEff_AMPA': 4,
         'MeanExtCon_AMPA': 800},
         'LIP': {
-        'FreqExt_AMPA': 2.5, # 2.2
+        'FreqExt_AMPA': 2.2, #2.5, 
         'MeanExtEff_AMPA': 2,
         'MeanExtCon_AMPA': 800},
         'Th': {
