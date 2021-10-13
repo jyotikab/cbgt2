@@ -9,7 +9,7 @@ def timestep_mutator(agent,popdata):
     for popid in range(len(popdata)):
         agent.ExtMuS_AMPA[popid] = agent.MeanExtEff_AMPA[popid] * agent.FreqExt_AMPA[popid] * .001 * agent.MeanExtCon_AMPA[popid] * agent.Tau_AMPA[popid]
         agent.ExtSigmaS_AMPA[popid] = agent.MeanExtEff_AMPA[popid] * np.sqrt(agent.Tau_AMPA[popid] * .5 * agent.FreqExt_AMPA[popid] * .001 * agent.MeanExtCon_AMPA[popid])
-        agent.ExtS_AMPA[popid] += agent.dt / agent.Tau_AMPA[popid] * (-agent.ExtS_AMPA[popid] + agent.ExtMuS_AMPA[popid]) # + agent.ExtSigmaS_AMPA[popid] * sqrt(agent.dt * 2. / agent.Tau_AMPA[popid]) * gasdev()
+        agent.ExtS_AMPA[popid] += agent.dt / agent.Tau_AMPA[popid] * (-agent.ExtS_AMPA[popid] + agent.ExtMuS_AMPA[popid]) + agent.ExtSigmaS_AMPA[popid] * np.sqrt(agent.dt * 2. / agent.Tau_AMPA[popid]) * np.random.normal(size=len(agent.Tau_AMPA[popid]))
         agent.LS_AMPA[popid] *= np.exp(-agent.dt / agent.Tau_AMPA[popid])
 
     for src_popid in range(len(popdata)):
@@ -21,7 +21,7 @@ def timestep_mutator(agent,popdata):
     for popid in range(len(popdata)):
         agent.ExtMuS_GABA[popid] = agent.MeanExtEff_GABA[popid] * agent.FreqExt_GABA[popid] * .001 * agent.MeanExtCon_GABA[popid] * agent.Tau_GABA[popid]
         agent.ExtSigmaS_GABA[popid] = agent.MeanExtEff_GABA[popid] * np.sqrt(agent.Tau_GABA[popid] * .5 * agent.FreqExt_GABA[popid] * .001 * agent.MeanExtCon_GABA[popid])
-        agent.ExtS_GABA[popid] += agent.dt / agent.Tau_GABA[popid] * (-agent.ExtS_GABA[popid] + agent.ExtMuS_GABA[popid]) # + agent.ExtSigmaS_GABA[popid] * sqrt(agent.dt * 2. / agent.Tau_GABA[popid]) * gasdev()
+        agent.ExtS_GABA[popid] += agent.dt / agent.Tau_GABA[popid] * (-agent.ExtS_GABA[popid] + agent.ExtMuS_GABA[popid]) + agent.ExtSigmaS_GABA[popid] * np.sqrt(agent.dt * 2. / agent.Tau_GABA[popid]) * np.random.normal(size=len(agent.Tau_AMPA[popid]))
         agent.LS_GABA[popid] *= np.exp(-agent.dt / agent.Tau_GABA[popid])
 
     for src_popid in range(len(popdata)):
@@ -33,7 +33,7 @@ def timestep_mutator(agent,popdata):
     for popid in range(len(popdata)):
         agent.ExtMuS_NMDA[popid] = agent.MeanExtEff_NMDA[popid] * agent.FreqExt_NMDA[popid] * .001 * agent.MeanExtCon_NMDA[popid] * agent.Tau_NMDA[popid]
         agent.ExtSigmaS_NMDA[popid] = agent.MeanExtEff_NMDA[popid] * np.sqrt(agent.Tau_NMDA[popid] * .5 * agent.FreqExt_NMDA[popid] * .001 * agent.MeanExtCon_NMDA[popid])
-        agent.ExtS_NMDA[popid] += agent.dt / agent.Tau_NMDA[popid] * (-agent.ExtS_NMDA[popid] + agent.ExtMuS_NMDA[popid]) # + agent.ExtSigmaS_NMDA[popid] * sqrt(agent.dt * 2. / agent.Tau_NMDA[popid]) * gasdev()
+        agent.ExtS_NMDA[popid] += agent.dt / agent.Tau_NMDA[popid] * (-agent.ExtS_NMDA[popid] + agent.ExtMuS_NMDA[popid]) + agent.ExtSigmaS_NMDA[popid] * np.sqrt(agent.dt * 2. / agent.Tau_NMDA[popid]) * np.random.normal(size=len(agent.Tau_AMPA[popid]))
         agent.LS_NMDA[popid] *= np.exp(-agent.dt / agent.Tau_NMDA[popid])
         agent.timesincelastspike[popid] += agent.dt
 
@@ -41,7 +41,7 @@ def timestep_mutator(agent,popdata):
         for dest_popid in range(len(popdata)):
             if agent.NMDA_con[src_popid][dest_popid] is not None:
                 for src_neuron in agent.spikes[src_popid]:
-                    agent.LastConductanceNMDA[src_popid][dest_popid][src_neuron] *= np.exp(-agent.timesincelastspike[src_popid][src_neuron]*agent.Tau_NMDA[dest_popid])
+                    agent.LastConductanceNMDA[src_popid][dest_popid][src_neuron] *= np.exp(-agent.timesincelastspike[src_popid][src_neuron]/agent.Tau_NMDA[dest_popid])
                     agent.LS_NMDA[dest_popid] += agent.NMDA_eff[src_popid][dest_popid][src_neuron] * agent.NMDA_con[src_popid][dest_popid][src_neuron]
                     agent.LastConductanceNMDA[src_popid][dest_popid][src_neuron] += 0.6332 * (1 - agent.LastConductanceNMDA[src_popid][dest_popid][src_neuron])
 
@@ -82,6 +82,7 @@ def timestep_mutator(agent,popdata):
         for neuron in agent.spikes[popid]:
             agent.V[popid][neuron] = 0
             agent.Ca[popid][neuron] += agent.alpha_ca[popid][neuron]
+            agent.RefrState[popid][neuron] = 10
             #agent.dpmn_XPOST[popid] = spikes
 
     for popid in range(len(popdata)):
