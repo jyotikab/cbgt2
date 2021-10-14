@@ -18,7 +18,7 @@ def CreateSynapses(popdata, cons, effs, plasticity):
 
             condata = None
             if con == 1.0:
-                if plasticity.iloc[idx1][idx2]:
+                if plasticity.iloc[idx1][idx2] or True: # disable broadcast-based compression
                     condata = np.ones((popdata['N'].loc[idx1],popdata['N'].loc[idx2]))
                 else:
                     condata = np.ones((popdata['N'].loc[idx1],1))
@@ -121,6 +121,7 @@ def initializeAgent(popdata):
         'LS_GABA',
         'LS_NMDA',
         'timesincelastspike',
+        'Ptimesincelastspike',
         'g_rb',
         'V',
         'V_h',

@@ -67,7 +67,7 @@ def plot_fr(results,smooth=False):
     else:
         g1.fig.savefig(figure_dir+'ActualFR.png', dpi=400)
     
-def plot_reward_and_Q_df(t_epochs,Q_df):
+def plot_reward_and_Q_df(t_epochs,Q_df,dat_tabs):
     Q_df_local = Q_df.copy()
     Q_df_local = Q_df_local.reset_index()
     Q_df_local.index-=1
@@ -82,7 +82,15 @@ def plot_reward_and_Q_df(t_epochs,Q_df):
     rew_df = rew_df.melt("Trials")
     rew_df["data_type"] = "reward_df"
     
+    chosen_action = pd.DataFrame(dat_tabs["decision"].copy())
+    chosen_action["Trials"] = chosen_action.index
+    chosen_action = chosen_action.rename(columns={"decision":"variable"})
+    chosen_action["value"] = chosen_action.groupby("variable").ngroup()
+    chosen_action["data_type"] = "chosen action"
+    print(chosen_action)
+    
     final_data = Q_df_local.append(rew_df)
+    final_data = final_data.append(chosen_action)
 
     g1 = sns.catplot(x="Trials",y="value",hue="variable",col="data_type",data=final_data,kind='point')
     for x in g1.axes[0]:

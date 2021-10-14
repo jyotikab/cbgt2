@@ -92,8 +92,8 @@ def mega_loop(self):
                 if len(thresholds_crossed) > 0:
                     agent.motor_queued = thresholds_crossed[0]
                     datatables_decision = agent.motor_queued
-
-                    agent.gain[agent.motor_queued] = 0.75 # sustained fraction in old network
+                    
+                    agent.gain[agent.motor_queued] =  0.75 # sustained fraction in old network
                 else:
                     agent.motor_queued = -1
 
@@ -112,6 +112,7 @@ def mega_loop(self):
                 else:
                     self.chosen_action = untrace(actionchannels.iloc[agent.motor_queued,0])
                 print("chosen_action",self.chosen_action)
+                datatables_decision = self.chosen_action
                 agent.motor_queued = None
 
         if agent.phase == 2:
