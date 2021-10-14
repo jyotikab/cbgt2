@@ -158,23 +158,23 @@ def helper_basestim(base=dict()):
 
     # mixture
     basestim = {'FSI': {
-        'FreqExt_AMPA': 3.0,#3.6,
+        'FreqExt_AMPA': 3.6,#3.0,
         'MeanExtEff_AMPA': 1.55,
         'MeanExtCon_AMPA': 800},
         'LIPI': {
         'FreqExt_AMPA': 1.05,
-        'MeanExtEff_AMPA': 0.6,#1.2,
+        'MeanExtEff_AMPA': 1.2,#0.6,
         'MeanExtCon_AMPA': 640},
         'GPi': {
         'FreqExt_AMPA': 0.8,
         'MeanExtEff_AMPA': 5.9,
         'MeanExtCon_AMPA': 800},
         'STNE': {
-        'FreqExt_AMPA': 5.2,#4.45,
+        'FreqExt_AMPA': 4.45,#5.2,
         'MeanExtEff_AMPA': 1.65,
         'MeanExtCon_AMPA': 800},
         'GPeP': {
-        'FreqExt_AMPA': 5,#4,
+        'FreqExt_AMPA': 4,#5,
         'MeanExtEff_AMPA': 2,
         'MeanExtCon_AMPA': 800,
         'FreqExt_GABA': 2,
@@ -189,7 +189,7 @@ def helper_basestim(base=dict()):
         'MeanExtEff_AMPA': 4,
         'MeanExtCon_AMPA': 800},
         'LIP': {
-        'FreqExt_AMPA': 2.5, # 2.2,
+        'FreqExt_AMPA': 2.2, # 2.5,
         'MeanExtEff_AMPA': 2,
         'MeanExtCon_AMPA': 800},
         'Th': {
