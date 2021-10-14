@@ -84,11 +84,15 @@ def define_changepoints(n_trials, cp_lambda):  #reward_t1, reward_t2,
         np.random.poisson(
             lam=cp_lambda,
             size=n_cps))  # calculate cp indices
+    print("cp_base",cp_base)
     # cumsum - return the cumulative sum of the elements along a given axis
-
+    #print("cp_base",cp_base)
+    
     cp_idx = np.insert(cp_base, 0, 0)  # add 0
+    
+    #print("cp_idx",cp_idx)
     cp_idx = np.append(cp_idx, n_trials - 1)  # add 0
-
+    #print("cp_idx",cp_idx)
     cp_idx = cp_idx[cp_idx < n_trials]
 
     # to remove possible equal elements
@@ -214,6 +218,8 @@ def GenRewardSchedule(n_trials, volatility, conflict, reward_mu, reward_std, act
         conflict, actionchannels, n_trials, reward_mu, reward_std)
     cp_idx, cp_indicator = define_changepoints(
         n_trials, volatility)
+    print("cp_idx",cp_idx)
+    print("cp_indicator",cp_indicator)
     #t1_epochs, t2_epochs
     t_epochs, noisy_pattern, volatile_pattern = define_epochs(
         n_trials, reward, cp_idx, conflict, actionchannels) #reward_t1, reward_t2

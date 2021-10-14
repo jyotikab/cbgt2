@@ -156,24 +156,25 @@ def helper_receptor(receps=None):
 
 def helper_basestim(base=dict()):
 
+    # mixture
     basestim = {'FSI': {
-        'FreqExt_AMPA': 3.6,
+        'FreqExt_AMPA': 3.0,#3.6,
         'MeanExtEff_AMPA': 1.55,
         'MeanExtCon_AMPA': 800},
         'LIPI': {
         'FreqExt_AMPA': 1.05,
-        'MeanExtEff_AMPA': 1.2,
+        'MeanExtEff_AMPA': 0.6,#1.2,
         'MeanExtCon_AMPA': 640},
         'GPi': {
         'FreqExt_AMPA': 0.8,
         'MeanExtEff_AMPA': 5.9,
         'MeanExtCon_AMPA': 800},
         'STNE': {
-        'FreqExt_AMPA': 4.45,
+        'FreqExt_AMPA': 5.2,#4.45,
         'MeanExtEff_AMPA': 1.65,
         'MeanExtCon_AMPA': 800},
         'GPeP': {
-        'FreqExt_AMPA': 4,
+        'FreqExt_AMPA': 5,#4,
         'MeanExtEff_AMPA': 2,
         'MeanExtCon_AMPA': 800,
         'FreqExt_GABA': 2,
@@ -188,13 +189,54 @@ def helper_basestim(base=dict()):
         'MeanExtEff_AMPA': 4,
         'MeanExtCon_AMPA': 800},
         'LIP': {
-        'FreqExt_AMPA': 2.5, # 2.2
+        'FreqExt_AMPA': 2.5, # 2.2,
         'MeanExtEff_AMPA': 2,
         'MeanExtCon_AMPA': 800},
         'Th': {
         'FreqExt_AMPA': 2.2,
         'MeanExtEff_AMPA': 2.5,
         'MeanExtCon_AMPA': 800}, }
+
+    # ejn
+    # basestim = {'FSI': {
+    #     'FreqExt_AMPA': 3.6,
+    #     'MeanExtEff_AMPA': 1.55,
+    #     'MeanExtCon_AMPA': 800},
+    #     'LIPI': {
+    #     'FreqExt_AMPA': 1.05,
+    #     'MeanExtEff_AMPA': 0.6,#1.2,
+    #     'MeanExtCon_AMPA': 640},
+    #     'GPi': {
+    #     'FreqExt_AMPA': 0.8,
+    #     'MeanExtEff_AMPA': 5.9,
+    #     'MeanExtCon_AMPA': 800},
+    #     'STNE': {
+    #     'FreqExt_AMPA': 4.45,
+    #     'MeanExtEff_AMPA': 1.65,
+    #     'MeanExtCon_AMPA': 800},
+    #     'GPeP': {
+    #     'FreqExt_AMPA': 4,
+    #     'MeanExtEff_AMPA': 2,
+    #     'MeanExtCon_AMPA': 800,
+    #     'FreqExt_GABA': 2,
+    #     'MeanExtEff_GABA': 2,
+    #     'MeanExtCon_GABA': 2000},
+    #     'D1STR': {
+    #     'FreqExt_AMPA': 1.3,
+    #     'MeanExtEff_AMPA': 4,
+    #     'MeanExtCon_AMPA': 800},
+    #     'D2STR': {
+    #     'FreqExt_AMPA': 1.3,
+    #     'MeanExtEff_AMPA': 4,
+    #     'MeanExtCon_AMPA': 800},
+    #     'LIP': {
+    #     'FreqExt_AMPA': 2.2,
+    #     'MeanExtEff_AMPA': 2,
+    #     'MeanExtCon_AMPA': 800},
+    #     'Th': {
+    #     'FreqExt_AMPA': 2.2,
+    #     'MeanExtEff_AMPA': 2.5,
+    #     'MeanExtCon_AMPA': 800}, }
 
     if base is not None:
         for key in base.keys():
