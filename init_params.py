@@ -94,7 +94,7 @@ def helper_cellparams(params=None):
 
 def helper_popspecific(pops=dict()):
 
-    popspecific = {'LIP': {'N': 204},
+    popspecific = {'LIP': {'N': 204, 'dpmn_cortex': 1},
                    'FSI': {'C': 0.2, 'Taum': 10},
                    # should be 10 but was 20 due to bug
                    'GPeP': {'N': 750, 'g_T': 0.06, 'Taum': 20},

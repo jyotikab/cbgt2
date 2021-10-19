@@ -136,7 +136,7 @@ def helper_update_Q_df(Q_df, Q_support_params, dpmndefaults, trial_num):
     # Required to perform mathematical calculations with data frame values
     Q_support_params = untrace(Q_support_params)
     #Q_df = untrace(Q_df)
-    
+
     #print('Qdf', Q_df)
     trial_wise_q_df = Q_df.iloc[trial_num]  # trial wise Q data frame
     trial_wise_chosen_action = Q_support_params.chosen_action  # trial wise chosen action
@@ -179,12 +179,12 @@ def helper_update_Q_df(Q_df, Q_support_params, dpmndefaults, trial_num):
     #print('newdata', new_data)
     Q_df = Q_df.append(new_data)
     #print('newQdf', Q_df)
-    
+
     # Update the correct value with q_val_updated
     Q_df.iloc[trial_num + 1][trial_wise_chosen_action] = q_val_updated
     #print('Qdf', Q_df)
     #print('Qdf data types', Q_df.dtypes)
-    
+
 
     # update dopamine burst ?
     dpmndefaults.dpmn_DAp = q_error * bayes_CPP * Q_support_params.dpmn_CPP_scale

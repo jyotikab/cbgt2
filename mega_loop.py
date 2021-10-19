@@ -41,6 +41,7 @@ def mega_loop(self):
     agent.ramping_extstim = np.zeros(len(actionchannels))
     agent.in_popids = np.where(popdata['name'] == 'LIP')[0]
     agent.out_popids = np.where(popdata['name'] == 'Th')[0]
+    agent.str_popids = np.where('STR' in popdata['name'])[0]
 
     presented_stimulus = 1
     self.chosen_action = None
@@ -98,7 +99,7 @@ def mega_loop(self):
                     agent.motor_queued = -1
 
         if agent.phase == 1:
-            if agent.phasetimer > 500:
+            if agent.phasetimer > 300:
                 agent.phase = 2
                 print('phasetimer',agent.phasetimer)
                 print('globaltimer',agent.globaltimer)
@@ -116,7 +117,7 @@ def mega_loop(self):
                 agent.motor_queued = None
 
         if agent.phase == 2:
-            if agent.phasetimer > 500:
+            if agent.phasetimer > 600:
                 self.dpmndefaults['dpmn_DAp'] = 0
                 self.trial_num += 1
                 agent.phase = 0
@@ -154,6 +155,8 @@ def mega_loop(self):
             datatables_reward = np.sign(self.reward_val)
             self.Q_support_params = qval.helper_update_Q_support_params(self.Q_support_params,self.reward_val,self.chosen_action)
             (self.Q_df, self.Q_support_params, self.dpmndefaults) = qval.helper_update_Q_df(self.Q_df,self.Q_support_params,self.dpmndefaults,self.trial_num)
+            for popid in agent.str_popids:
+                agent.dpmn_DAp[popid] += self.dpmndefaults['dpmn_DAp']
             self.chosen_action = None
 
     self.popfreqs = pd.DataFrame(agent.FRs)

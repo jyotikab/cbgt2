@@ -5,164 +5,6 @@ def multitimestep_mutator(agent,popdata,numsteps):
         timestep_mutator(agent,popdata)
 
 
-def timestep_mutator_2(a,popdata):
-    Npop = len(popdata)
-
-    newspikes = []
-    for i in range(Npop):
-        newspikes.append([])
-
-    # 1337-1345
-    for p in range(Npop):
-        if a.dpmn_type[p][0] > 0:
-            pass
-            #a.dpmn_XPRE[p] *= 0
-            #a.dpmn_XPOST[p] *= 0
-
-    # 1347-1392
-    # Compute the decay of the total conductances and add external input
-    for p in range(Npop):
-        selected = np.random.randint(len(a.N[p]))
-        for i in range(len(a.N[p])):
-            # AMPA
-            freq = a.FreqExt_AMPA[p][i]
-            efficacy = a.MeanExtEff_AMPA[p][i]
-            a.ExtMuS_AMPA[p][i] = freq * .001 * efficacy * a.MeanExtCon_AMPA[p][i] * a.Tau_AMPA[p][i]
-            a.ExtSigmaS_AMPA[p][i] = np.sqrt(a.Tau_AMPA[p][i] * .5 * freq * .001 * efficacy * efficacy * a.MeanExtCon_AMPA[p][i])
-            s = a.ExtSigmaS_AMPA[p][i]
-            if s > 0:
-                a.ExtS_AMPA[p][i] += a.dt / a.Tau_AMPA[p][i] * (-a.ExtS_AMPA[p][i] + a.ExtMuS_AMPA[p][i]) + s * np.sqrt(a.dt * 2. / a.Tau_AMPA[p][i]) * np.random.normal()
-            else:
-                a.ExtS_AMPA[p][i] += a.dt / a.Tau_AMPA[p][i] * (-a.ExtS_AMPA[p][i] + a.ExtMuS_AMPA[p][i])
-            a.LS_AMPA[p][i] *= np.exp(-a.dt / a.Tau_AMPA[p][i]) # decay
-
-            # GABA
-            freq = a.FreqExt_GABA[p][i]
-            efficacy = a.MeanExtEff_GABA[p][i]
-            a.ExtMuS_GABA[p][i] = freq * .001 * efficacy * a.MeanExtCon_GABA[p][i] * a.Tau_GABA[p][i]
-            a.ExtSigmaS_GABA[p][i] = np.sqrt(a.Tau_GABA[p][i] * .5 * freq * .001 * efficacy * efficacy * a.MeanExtCon_GABA[p][i])
-            s = a.ExtSigmaS_GABA[p][i]
-            if s > 0:
-                a.ExtS_GABA[p][i] += a.dt / a.Tau_GABA[p][i] * (-a.ExtS_GABA[p][i] + a.ExtMuS_GABA[p][i]) + s * np.sqrt(a.dt * 2. / a.Tau_GABA[p][i]) * np.random.normal()
-            else:
-                a.ExtS_GABA[p][i] += a.dt / a.Tau_GABA[p][i] * (-a.ExtS_GABA[p][i] + a.ExtMuS_GABA[p][i])
-            a.LS_GABA[p][i] *= np.exp(-a.dt / a.Tau_GABA[p][i]) # decay
-
-            # NMDA
-            freq = a.FreqExt_NMDA[p][i]
-            efficacy = a.MeanExtEff_NMDA[p][i]
-            a.ExtMuS_NMDA[p][i] = freq * .001 * efficacy * a.MeanExtCon_NMDA[p][i] * a.Tau_NMDA[p][i]
-            a.ExtSigmaS_NMDA[p][i] = np.sqrt(a.Tau_NMDA[p][i] * .5 * freq * .001 * efficacy * efficacy * a.MeanExtCon_NMDA[p][i])
-            s = a.ExtSigmaS_NMDA[p][i]
-            if s > 0:
-                a.ExtS_NMDA[p][i] += a.dt / a.Tau_NMDA[p][i] * (-a.ExtS_NMDA[p][i] + a.ExtMuS_NMDA[p][i]) + s * np.sqrt(a.dt * 2. / a.Tau_NMDA[p][i]) * np.random.normal()
-            else:
-                a.ExtS_NMDA[p][i] += a.dt / a.Tau_NMDA[p][i] * (-a.ExtS_NMDA[p][i] + a.ExtMuS_NMDA[p][i])
-            a.LS_NMDA[p][i] *= np.exp(-a.dt / a.Tau_NMDA[p][i]) # decay
-
-            a.timesincelastspike[p][i] += a.dt
-
-    # 1396-1449
-    # Update the total conductances (changes provoked by the spikes)
-    for p in range(Npop):
-        for sourceneuron in a.spikes[p]:
-            for tp in range(Npop):
-                # AMPA
-                if a.AMPA_con[p][tp] is not None:
-                    for tn in range(len(a.N[tp])):
-                        pathway_strength = a.AMPA_eff[p][tp][sourceneuron,tn]
-                        a.LS_AMPA[tp][tn] += pathway_strength
-
-                # GABA
-                if a.GABA_con[p][tp] is not None:
-                    for tn in range(len(a.N[tp])):
-                        pathway_strength = a.GABA_eff[p][tp][sourceneuron,tn]
-                        a.LS_GABA[tp][tn] += pathway_strength
-
-                # NMDA
-                if a.NMDA_con[p][tp] is not None:
-                    for tn in range(len(a.N[tp])):
-                        pathway_strength = a.NMDA_eff[p][tp][sourceneuron,tn]
-                        ALPHA = 0.6332
-                        a.LastConductanceNMDA[p][tp][sourceneuron,tn] *= np.exp(-a.timesincelastspike[p][sourceneuron] / a.Tau_NMDA[tp][tn])
-                        a.LS_NMDA[tp][tn] += pathway_strength * ALPHA * (1. - a.LastConductanceNMDA[p][tp][sourceneuron,tn])
-                        a.LastConductanceNMDA[p][tp][sourceneuron,tn] += ALPHA * (1. - a.LastConductanceNMDA[p][tp][sourceneuron,tn])
-
-                # dopaminergic learning
-                #if a.dpmn_cortex[p][sourceneuron] > 0 and a.dpmn_type[tp][tn] > 0:
-                #    a.dpmn_XPRE[tp][tn] = 1
-
-    for p in range(Npop):
-        for i in range(len(a.N[p])):
-            g_rb = 0
-            if a.V[p][i] < a.V_h[p][i]:
-                a.h[p][i] += (1.0 - a.h[p][i]) * a.dt / a.tauhp[p][i]
-            else:
-                a.h[p][i] += -a.h[p][i] * a.dt / a.tauhm[p][i]
-                g_rb = a.g_T[p][i] * a.h[p][i]
-
-            if a.V[p][i] > a.Threshold[p][i]:
-                a.V[p][i] = a.ResetPot[p][i]
-                a.RefrState[p][i] -= 1
-                continue
-
-            if a.RefrState[p][i] > 0:
-                a.RefrState[p][i] -= 1
-                continue
-
-            g_adr = 0
-            if a.g_adr_max[p][i] != 0:
-                g_adr = a.g_adr_max[p][i] / (1 + np.exp((a.V[p][i] - a.Vadr_h[p][i]) / a.Vadr_s[p][i]))
-
-            g_k = 0
-            if a.g_k_max[p][i] != 0:
-                tau_max = a.tau_k_max[p][i]
-                dv = a.V[p][i] + 55.0
-                tau_n = tau_max / (np.exp(-1 * dv / 30) + np.exp(dv / 30))
-                n_inif = 1 / (1 + np.exp(-(a.V[p][i] - a.Vk_h[p][i]) / a.Vk_s[p][i]))
-                a.n_k[p][i] += -a.dt / tau_n * (a.n_k[p][i] - n_inif)
-                g_k = a.g_k_max[p][i] * a.n_k[p][i]
-
-            if a.g_ahp[p][i] == 0:
-                a.V[p][i] += -a.dt * (1 / a.Taum[p][i] * (a.V[p][i] - a.RestPot[p][i]) + g_adr / a.C[p][i] * (a.V[p][i] - a.ADRRevPot[p][i]) + g_k / a.C[p][i] * (a.V[p][i] - a.ADRRevPot[p][i]) + g_rb / a.C[p][i] * (a.V[p][i] - a.V_T[p][i]))
-            else:
-                a.V[p][i] += -a.dt * (1 / a.Taum[p][i] * (a.V[p][i] - a.RestPot[p][i]) +  a.Ca[p][i] * a.g_ahp[p][i] / a.C[p][i] * 0.001 * (a.V[p][i] - a.Vk[p][i]) + g_adr / a.C[p][i] * (a.V[p][i] - a.ADRRevPot[p][i]) + g_k / a.C[p][i] * (a.V[p][i] - a.ADRRevPot[p][i]) + g_rb / a.C[p][i] * (a.V[p][i] - a.V_T[p][i]))
-
-            a.Ca[p][i] += -a.Ca[p][i] * a.dt / a.Tau_ca[p][i]
-
-            Vaux = a.V[p][i]
-            if Vaux > a.Threshold[p][i]:
-                Vaux = a.Threshold[p][i]
-
-            # AMPA
-            a.V[p][i] += a.dt * (a.RevPot_AMPA[p][i] - Vaux) * .001 * (a.LS_AMPA[p][i] + a.ExtS_AMPA[p][i]) / a.C[p][i]
-            # GABA
-            a.V[p][i] += a.dt * (a.RevPot_GABA[p][i] - Vaux) * .001 * (a.LS_GABA[p][i] + a.ExtS_GABA[p][i]) / a.C[p][i]
-            # NMDA
-            a.V[p][i] += a.dt * (a.RevPot_NMDA[p][i] - Vaux) * .001 * (a.LS_NMDA[p][i] + a.ExtS_NMDA[p][i]) / a.C[p][i] / (1. + np.exp(-0.062 * Vaux / 3.57))
-
-            if a.V[p][i] > a.Threshold[p][i]:
-                #print("a spike occured!")
-                newspikes[p].append(i)
-
-                a.V[p][i] = a.ResetPot[p][i]
-                a.timesincelastspike[p][i] = 0
-
-                a.V[p][i] = 0
-                a.RefrState[p][i] = 10 # 2/dt
-
-                a.Ca[p][i] += a.alpha_ca[p][i]
-
-    a.spikes = newspikes
-
-    for p in range(Npop):
-        a.rollingbuffer[p][a.bufferpointer] = len(a.spikes[p])
-    a.bufferpointer += 1
-    if a.bufferpointer >= a.bufferlength:
-        a.bufferpointer = 0
-
-
-
 def timestep_mutator(a,popdata):
 
     Npop = len(popdata)
@@ -170,6 +12,11 @@ def timestep_mutator(a,popdata):
     newspikes = []
     for i in range(Npop):
         newspikes.append([])
+
+    # 1337-1345
+    for popid in range(len(popdata)):
+        a.dpmn_XPRE[popid] *= 0
+        a.dpmn_XPOST[popid] *= 0
 
     for popid in range(len(popdata)):
         a.ExtMuS_AMPA[popid] = a.MeanExtEff_AMPA[popid] * a.FreqExt_AMPA[popid] * .001 * a.MeanExtCon_AMPA[popid] * a.Tau_AMPA[popid]
@@ -182,6 +29,8 @@ def timestep_mutator(a,popdata):
             if a.AMPA_con[src_popid][dest_popid] is not None:
                 for src_neuron in a.spikes[src_popid]:
                     a.LS_AMPA[dest_popid] += a.AMPA_eff[src_popid][dest_popid][src_neuron] * a.AMPA_con[src_popid][dest_popid][src_neuron]
+
+                    a.dpmn_XPRE[dest_popid] = np.maximum(a.dpmn_XPRE[dest_popid], a.dpmn_cortex[src_popid][src_neuron] * a.AMPA_con[src_popid][dest_popid][src_neuron] * np.sign(a.dpmn_type[dest_popid]))
 
     for popid in range(len(popdata)):
         a.ExtMuS_GABA[popid] = a.MeanExtEff_GABA[popid] * a.FreqExt_GABA[popid] * .001 * a.MeanExtCon_GABA[popid] * a.Tau_GABA[popid]
@@ -327,7 +176,7 @@ def timestep_mutator(a,popdata):
             a.RefrState[popid][neuron] = 10
             a.Ptimesincelastspike[popid][neuron] = a.timesincelastspike[popid][neuron]
             a.timesincelastspike[popid][neuron] = 0
-            #a.dpmn_XPOST[popid] = spikes
+            a.dpmn_XPOST[popid][neuron] = 1
 
     a.spikes = newspikes
 
@@ -395,7 +244,186 @@ def timestep_mutator(a,popdata):
     # a.spikes = newspikes
 
     for popid in range(len(popdata)):
+        if a.dpmn_type[popid][0] > 0:
+            a.dpmn_DAp[popid] -= a.dt * a.dpmn_DAp[popid] * a.dpmn_tauDOP[popid]
+            a.dpmn_APRE[popid] += a.dt * (a.dpmn_dPRE[popid] * a.dpmn_XPRE[popid] - a.dpmn_APRE[popid]) / a.dpmn_tauPRE[popid]
+            a.dpmn_APOST[popid] += a.dt * (a.dpmn_dPOST[popid] * a.dpmn_XPOST[popid] - a.dpmn_APOST[popid]) / a.dpmn_tauPOST[popid]
+
+            a.dpmn_E[popid] += a.dt * (a.dpmn_XPOST[popid] * a.dpmn_APRE[popid] - a.dpmn_XPRE[popid] * a.dpmn_APOST[popid] - a.dpmn_E[popid]) / a.dpmn_tauE[popid]
+
+            DA = a.dpmn_m[popid] * (a.dpmn_DAp[popid] + a.dpmn_DAt[popid])
+
+            # ignore motivational decay for now? 1645-1647 are excluded
+
+            fDA = DA
+            if a.dpmn_type[popid][0] > 1.5:
+                fDA = DA / (2.5 + abs(DA))
+
+            for src_popid in range(len(popdata)):
+                if a.dpmn_cortex[src_popid][0] > 0:
+                    if a.AMPA_con[src_popid][popid] is not None:
+                        a.AMPA_eff[src_popid][popid] += a.dt * a.AMPA_con[src_popid][popid] * (a.dpmn_wmax[popid] - a.AMPA_eff[src_popid][popid]) * a.dpmn_alphaw[popid] * fDA * a.dpmn_E[popid]
+
+    for popid in range(len(popdata)):
         a.rollingbuffer[popid][a.bufferpointer] = len(a.spikes[popid])
     a.bufferpointer += 1
     if a.bufferpointer >= a.bufferlength:
         a.bufferpointer = 0
+
+#####################################################
+#
+# def timestep_mutator_2(a,popdata):
+#     Npop = len(popdata)
+#
+#     newspikes = []
+#     for i in range(Npop):
+#         newspikes.append([])
+#
+#     # 1337-1345
+#     for p in range(Npop):
+#         if a.dpmn_type[p][0] > 0:
+#             pass
+#             #a.dpmn_XPRE[p] *= 0
+#             #a.dpmn_XPOST[p] *= 0
+#
+#     # 1347-1392
+#     # Compute the decay of the total conductances and add external input
+#     for p in range(Npop):
+#         selected = np.random.randint(len(a.N[p]))
+#         for i in range(len(a.N[p])):
+#             # AMPA
+#             freq = a.FreqExt_AMPA[p][i]
+#             efficacy = a.MeanExtEff_AMPA[p][i]
+#             a.ExtMuS_AMPA[p][i] = freq * .001 * efficacy * a.MeanExtCon_AMPA[p][i] * a.Tau_AMPA[p][i]
+#             a.ExtSigmaS_AMPA[p][i] = np.sqrt(a.Tau_AMPA[p][i] * .5 * freq * .001 * efficacy * efficacy * a.MeanExtCon_AMPA[p][i])
+#             s = a.ExtSigmaS_AMPA[p][i]
+#             if s > 0:
+#                 a.ExtS_AMPA[p][i] += a.dt / a.Tau_AMPA[p][i] * (-a.ExtS_AMPA[p][i] + a.ExtMuS_AMPA[p][i]) + s * np.sqrt(a.dt * 2. / a.Tau_AMPA[p][i]) * np.random.normal()
+#             else:
+#                 a.ExtS_AMPA[p][i] += a.dt / a.Tau_AMPA[p][i] * (-a.ExtS_AMPA[p][i] + a.ExtMuS_AMPA[p][i])
+#             a.LS_AMPA[p][i] *= np.exp(-a.dt / a.Tau_AMPA[p][i]) # decay
+#
+#             # GABA
+#             freq = a.FreqExt_GABA[p][i]
+#             efficacy = a.MeanExtEff_GABA[p][i]
+#             a.ExtMuS_GABA[p][i] = freq * .001 * efficacy * a.MeanExtCon_GABA[p][i] * a.Tau_GABA[p][i]
+#             a.ExtSigmaS_GABA[p][i] = np.sqrt(a.Tau_GABA[p][i] * .5 * freq * .001 * efficacy * efficacy * a.MeanExtCon_GABA[p][i])
+#             s = a.ExtSigmaS_GABA[p][i]
+#             if s > 0:
+#                 a.ExtS_GABA[p][i] += a.dt / a.Tau_GABA[p][i] * (-a.ExtS_GABA[p][i] + a.ExtMuS_GABA[p][i]) + s * np.sqrt(a.dt * 2. / a.Tau_GABA[p][i]) * np.random.normal()
+#             else:
+#                 a.ExtS_GABA[p][i] += a.dt / a.Tau_GABA[p][i] * (-a.ExtS_GABA[p][i] + a.ExtMuS_GABA[p][i])
+#             a.LS_GABA[p][i] *= np.exp(-a.dt / a.Tau_GABA[p][i]) # decay
+#
+#             # NMDA
+#             freq = a.FreqExt_NMDA[p][i]
+#             efficacy = a.MeanExtEff_NMDA[p][i]
+#             a.ExtMuS_NMDA[p][i] = freq * .001 * efficacy * a.MeanExtCon_NMDA[p][i] * a.Tau_NMDA[p][i]
+#             a.ExtSigmaS_NMDA[p][i] = np.sqrt(a.Tau_NMDA[p][i] * .5 * freq * .001 * efficacy * efficacy * a.MeanExtCon_NMDA[p][i])
+#             s = a.ExtSigmaS_NMDA[p][i]
+#             if s > 0:
+#                 a.ExtS_NMDA[p][i] += a.dt / a.Tau_NMDA[p][i] * (-a.ExtS_NMDA[p][i] + a.ExtMuS_NMDA[p][i]) + s * np.sqrt(a.dt * 2. / a.Tau_NMDA[p][i]) * np.random.normal()
+#             else:
+#                 a.ExtS_NMDA[p][i] += a.dt / a.Tau_NMDA[p][i] * (-a.ExtS_NMDA[p][i] + a.ExtMuS_NMDA[p][i])
+#             a.LS_NMDA[p][i] *= np.exp(-a.dt / a.Tau_NMDA[p][i]) # decay
+#
+#             a.timesincelastspike[p][i] += a.dt
+#
+#     # 1396-1449
+#     # Update the total conductances (changes provoked by the spikes)
+#     for p in range(Npop):
+#         for sourceneuron in a.spikes[p]:
+#             for tp in range(Npop):
+#                 # AMPA
+#                 if a.AMPA_con[p][tp] is not None:
+#                     for tn in range(len(a.N[tp])):
+#                         pathway_strength = a.AMPA_eff[p][tp][sourceneuron,tn]
+#                         a.LS_AMPA[tp][tn] += pathway_strength
+#
+#                 # GABA
+#                 if a.GABA_con[p][tp] is not None:
+#                     for tn in range(len(a.N[tp])):
+#                         pathway_strength = a.GABA_eff[p][tp][sourceneuron,tn]
+#                         a.LS_GABA[tp][tn] += pathway_strength
+#
+#                 # NMDA
+#                 if a.NMDA_con[p][tp] is not None:
+#                     for tn in range(len(a.N[tp])):
+#                         pathway_strength = a.NMDA_eff[p][tp][sourceneuron,tn]
+#                         ALPHA = 0.6332
+#                         a.LastConductanceNMDA[p][tp][sourceneuron,tn] *= np.exp(-a.timesincelastspike[p][sourceneuron] / a.Tau_NMDA[tp][tn])
+#                         a.LS_NMDA[tp][tn] += pathway_strength * ALPHA * (1. - a.LastConductanceNMDA[p][tp][sourceneuron,tn])
+#                         a.LastConductanceNMDA[p][tp][sourceneuron,tn] += ALPHA * (1. - a.LastConductanceNMDA[p][tp][sourceneuron,tn])
+#
+#                 # dopaminergic learning
+#                 #if a.dpmn_cortex[p][sourceneuron] > 0 and a.dpmn_type[tp][tn] > 0:
+#                 #    a.dpmn_XPRE[tp][tn] = 1
+#
+#     for p in range(Npop):
+#         for i in range(len(a.N[p])):
+#             g_rb = 0
+#             if a.V[p][i] < a.V_h[p][i]:
+#                 a.h[p][i] += (1.0 - a.h[p][i]) * a.dt / a.tauhp[p][i]
+#             else:
+#                 a.h[p][i] += -a.h[p][i] * a.dt / a.tauhm[p][i]
+#                 g_rb = a.g_T[p][i] * a.h[p][i]
+#
+#             if a.V[p][i] > a.Threshold[p][i]:
+#                 a.V[p][i] = a.ResetPot[p][i]
+#                 a.RefrState[p][i] -= 1
+#                 continue
+#
+#             if a.RefrState[p][i] > 0:
+#                 a.RefrState[p][i] -= 1
+#                 continue
+#
+#             g_adr = 0
+#             if a.g_adr_max[p][i] != 0:
+#                 g_adr = a.g_adr_max[p][i] / (1 + np.exp((a.V[p][i] - a.Vadr_h[p][i]) / a.Vadr_s[p][i]))
+#
+#             g_k = 0
+#             if a.g_k_max[p][i] != 0:
+#                 tau_max = a.tau_k_max[p][i]
+#                 dv = a.V[p][i] + 55.0
+#                 tau_n = tau_max / (np.exp(-1 * dv / 30) + np.exp(dv / 30))
+#                 n_inif = 1 / (1 + np.exp(-(a.V[p][i] - a.Vk_h[p][i]) / a.Vk_s[p][i]))
+#                 a.n_k[p][i] += -a.dt / tau_n * (a.n_k[p][i] - n_inif)
+#                 g_k = a.g_k_max[p][i] * a.n_k[p][i]
+#
+#             if a.g_ahp[p][i] == 0:
+#                 a.V[p][i] += -a.dt * (1 / a.Taum[p][i] * (a.V[p][i] - a.RestPot[p][i]) + g_adr / a.C[p][i] * (a.V[p][i] - a.ADRRevPot[p][i]) + g_k / a.C[p][i] * (a.V[p][i] - a.ADRRevPot[p][i]) + g_rb / a.C[p][i] * (a.V[p][i] - a.V_T[p][i]))
+#             else:
+#                 a.V[p][i] += -a.dt * (1 / a.Taum[p][i] * (a.V[p][i] - a.RestPot[p][i]) +  a.Ca[p][i] * a.g_ahp[p][i] / a.C[p][i] * 0.001 * (a.V[p][i] - a.Vk[p][i]) + g_adr / a.C[p][i] * (a.V[p][i] - a.ADRRevPot[p][i]) + g_k / a.C[p][i] * (a.V[p][i] - a.ADRRevPot[p][i]) + g_rb / a.C[p][i] * (a.V[p][i] - a.V_T[p][i]))
+#
+#             a.Ca[p][i] += -a.Ca[p][i] * a.dt / a.Tau_ca[p][i]
+#
+#             Vaux = a.V[p][i]
+#             if Vaux > a.Threshold[p][i]:
+#                 Vaux = a.Threshold[p][i]
+#
+#             # AMPA
+#             a.V[p][i] += a.dt * (a.RevPot_AMPA[p][i] - Vaux) * .001 * (a.LS_AMPA[p][i] + a.ExtS_AMPA[p][i]) / a.C[p][i]
+#             # GABA
+#             a.V[p][i] += a.dt * (a.RevPot_GABA[p][i] - Vaux) * .001 * (a.LS_GABA[p][i] + a.ExtS_GABA[p][i]) / a.C[p][i]
+#             # NMDA
+#             a.V[p][i] += a.dt * (a.RevPot_NMDA[p][i] - Vaux) * .001 * (a.LS_NMDA[p][i] + a.ExtS_NMDA[p][i]) / a.C[p][i] / (1. + np.exp(-0.062 * Vaux / 3.57))
+#
+#             if a.V[p][i] > a.Threshold[p][i]:
+#                 #print("a spike occured!")
+#                 newspikes[p].append(i)
+#
+#                 a.V[p][i] = a.ResetPot[p][i]
+#                 a.timesincelastspike[p][i] = 0
+#
+#                 a.V[p][i] = 0
+#                 a.RefrState[p][i] = 10 # 2/dt
+#
+#                 a.Ca[p][i] += a.alpha_ca[p][i]
+#
+#     a.spikes = newspikes
+#
+#     for p in range(Npop):
+#         a.rollingbuffer[p][a.bufferpointer] = len(a.spikes[p])
+#     a.bufferpointer += 1
+#     if a.bufferpointer >= a.bufferlength:
+#         a.bufferpointer = 0
