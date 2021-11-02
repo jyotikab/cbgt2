@@ -7,6 +7,7 @@ import init_params as par
 import popconstruct as popconstruct
 import qvalues as qval
 import generateepochs as gen
+import generate_stop_dataframe as gen_stop
 from agentmatrixinit import *
 from agent_timestep import timestep_mutator, multitimestep_mutator
 import mega_loop as ml
@@ -72,15 +73,37 @@ def create_reward_pipeline(pl):
     rsg = cbgt.Pipeline() #rsg is short for 'reward schedule generator'
 
 
-    (rsg.volatile_pattern, rsg.cp_idx,  rsg.cp_indicator, rsg.noisy_pattern, rsg.t_epochs) = rsg[gen.GenRewardSchedule](
+    (rsg.volatile_pattern, rsg.cp_idx,  rsg.cp_indicator, rsg.noisy_pattern, rsg.t_epochs, rsg.block) = rsg[gen.GenRewardSchedule](
         rsg.n_trials,
         rsg.volatility,
         rsg.conflict,
         rsg.reward_mu,
         rsg.reward_std, pl.actionchannels
-    ).shape(5)
+    ).shape(6)
     
     return rsg
+
+
+def create_stop_pipeline(pl):
+    stop = cbgt.Pipeline() #rsg is short for 'reward schedule generator'
+
+
+    (stop.stop_df, stop.stop_channels_df) = stop[gen_stop.GenStopSchedule](
+        stop.stop_signal_probability,
+        pl.actionchannels,
+        stop.n_trials,
+        stop.stop_signal_channel,
+        stop.stop_signal_amplitude,
+        stop.stop_signal_onset,
+        stop.stop_signal_present
+     ).shape(2)
+    
+    return stop
+
+
+
+
+
 
 # 2.3 Create q-values pipeline 
 
@@ -106,9 +129,11 @@ def create_main_pipeline():
     pl.add(codeblock_modifyactionchannels)
     
     rsg = create_reward_pipeline(pl)
+    stop = create_stop_pipeline(pl)
     
     #Adding rsg pipeline to the network pipeline: 
     pl.add(rsg) 
+    pl.add(stop)
     
     #to update the Q-values 
     pl.trial_num = 0 #first row of Q-values df - initialization data 

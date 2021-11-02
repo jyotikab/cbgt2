@@ -81,10 +81,10 @@ def mega_loop(self):
             thresholds_crossed = np.where(gateFRs > 30)[0]
             if len(thresholds_crossed) > 0 or agent.phasetimer > 1000:
 
-                print('phasetimer',agent.phasetimer)
-                print('globaltimer',agent.globaltimer)
-                print('gateFRs',gateFRs)
-                print('thresholds_crossed',thresholds_crossed)
+                #print('phasetimer',agent.phasetimer)
+                #print('globaltimer',agent.globaltimer)
+                #print('gateFRs',gateFRs)
+                #print('thresholds_crossed',thresholds_crossed)
                 agent.phase = 1
                 agent.phasetimer = 0
                 agent.gain = np.zeros(len(actionchannels))
@@ -101,8 +101,8 @@ def mega_loop(self):
         if agent.phase == 1:
             if agent.phasetimer > 300:
                 agent.phase = 2
-                print('phasetimer',agent.phasetimer)
-                print('globaltimer',agent.globaltimer)
+                #print('phasetimer',agent.phasetimer)
+                #print('globaltimer',agent.globaltimer)
                 agent.phasetimer = 0
                 agent.gain = np.zeros(len(actionchannels))
                 print(actionchannels)
@@ -114,6 +114,10 @@ def mega_loop(self):
                     self.chosen_action = untrace(actionchannels.iloc[agent.motor_queued,0])
                 datatables_decision = self.chosen_action
                 print("chosen_action",self.chosen_action)
+                print("self.trial_num",self.trial_num)
+                
+                datatables_correctdecision = self.block[self.trial_num]
+                
                 agent.motor_queued = None
 
         if agent.phase == 2:

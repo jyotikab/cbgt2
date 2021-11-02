@@ -80,20 +80,22 @@ def define_changepoints(n_trials, cp_lambda):  #reward_t1, reward_t2,
 
     # find approximate number of change points
     n_cps = int(n_trials / cp_lambda)
+        
     cp_base = np.cumsum(
         np.random.poisson(
             lam=cp_lambda,
             size=n_cps))  # calculate cp indices
     # cumsum - return the cumulative sum of the elements along a given axis
-
+    
     cp_idx = np.insert(cp_base, 0, 0)  # add 0
     cp_idx = np.append(cp_idx, n_trials - 1)  # add 0
-
-    cp_idx = cp_idx[cp_idx < n_trials]
-
+    
+    cp_idx = cp_idx[np.where(cp_idx < n_trials)]
+    
     # to remove possible equal elements
     cp_idx = list(set(cp_idx))
-
+    cp_idx = sorted(cp_idx)
+    
     cp_indicator = np.zeros(n_trials)
     cp_indicator[cp_idx] = 1
 
@@ -144,11 +146,13 @@ def define_epochs(n_trials, reward, cp_idx, opt_p, actionchannels):  #reward_t1,
     subopt_p = 1 - opt_p
 
     # remove or not? not needed for the moment
-    p_id_solution = []  # female greeble is always first
+    block = []  # female greeble is always first
     # returns an integer representing the unicode character
-    f_greeble = ord('f')
-    m_greeble = ord('m')
-
+    action1 = actionchannels.iloc[0]['action']
+    action2 = actionchannels.iloc[1]['action']
+    
+    
+    print(cp_idx)
     current_target = True
     # treat all the changepoints except for the last one
     for i in range(len(cp_idx) - 1):
@@ -157,13 +161,13 @@ def define_epochs(n_trials, reward, cp_idx, opt_p, actionchannels):  #reward_t1,
             t1_epochs.append(reward_t1[cp_idx[i]:cp_idx[i + 1]])
             t2_epochs.append(reward_t2[cp_idx[i]:cp_idx[i + 1]])
             #reward_p.append(np.repeat(opt_p, cp_idx[i+1]-cp_idx[i]))
-            #p_id_solution.append(np.repeat(f_greeble, cp_idx[i+1]-cp_idx[i]))
+            block.append(np.repeat(action1, cp_idx[i+1]-cp_idx[i]))
         else:
             volatile_pattern.append(np.repeat(1., cp_idx[i + 1] - cp_idx[i]))
             t1_epochs.append(reward_t2[cp_idx[i]:cp_idx[i + 1]])
             t2_epochs.append(reward_t1[cp_idx[i]:cp_idx[i + 1]])
             #reward_p.append(np.repeat(subopt_p, cp_idx[i+1]-cp_idx[i]))
-            #p_id_solution.append(np.repeat(m_greeble, cp_idx[i+1]-cp_idx[i]))
+            block.append(np.repeat(action2, cp_idx[i+1]-cp_idx[i]))
 
         #epoch_number.append(np.repeat(i, cp_idx[i+1]-cp_idx[i]))
 
@@ -177,14 +181,14 @@ def define_epochs(n_trials, reward, cp_idx, opt_p, actionchannels):  #reward_t1,
                 t1_epochs.append(reward_t1[cp_idx[i + 1]:])
                 t2_epochs.append(reward_t2[cp_idx[i + 1]:])
                 # reward_p.append(opt_p)
-                # p_id_solution.append(f_greeble)
+                block.append(action1)
             else:
                 volatile_pattern.append(
                     np.repeat(1., cp_idx[i + 1] - cp_idx[i]))
                 t1_epochs.append(reward_t2[cp_idx[i + 1]:])
                 t2_epochs.append(reward_t1[cp_idx[i + 1]:])
                 # reward_p.append(subopt_p)
-                # p_id_solution.append(m_greeble)
+                block.append(action2)
 
             # epoch_number.append(i+1)
 
@@ -204,7 +208,7 @@ def define_epochs(n_trials, reward, cp_idx, opt_p, actionchannels):  #reward_t1,
     # epoch_number
 
     # , epoch_number, reward_p, p_id_solution, t1_epochs, t2_epochs,
-    return  t_epochs, noisy_pattern, volatile_pattern
+    return  t_epochs, noisy_pattern, volatile_pattern, np.hstack(block)
 
 
 def GenRewardSchedule(n_trials, volatility, conflict, reward_mu, reward_std, actionchannels):
@@ -215,6 +219,7 @@ def GenRewardSchedule(n_trials, volatility, conflict, reward_mu, reward_std, act
     cp_idx, cp_indicator = define_changepoints(
         n_trials, volatility)
     #t1_epochs, t2_epochs
-    t_epochs, noisy_pattern, volatile_pattern = define_epochs(
+    t_epochs, noisy_pattern, volatile_pattern, block = define_epochs(
         n_trials, reward, cp_idx, conflict, actionchannels) #reward_t1, reward_t2
-    return volatile_pattern, cp_idx, cp_indicator, noisy_pattern, t_epochs #t1_epochs, t2_epochs
+    print(block)
+    return volatile_pattern, cp_idx, cp_indicator, noisy_pattern, t_epochs, block #t1_epochs, t2_epochs

@@ -200,7 +200,7 @@ def initializeAgent(popdata):
 
     agent.dt = 0.2 # ms
 
-    agent.bufferlength = 300 #50 # 10ms averaging window / 0.2ms dt
+    agent.bufferlength = 200 #50 # 10ms averaging window / 0.2ms dt
     agent.bufferpointer = 0
     agent.rollingbuffer = np.zeros((len(popdata),agent.bufferlength))
 
