@@ -150,8 +150,6 @@ def helper_update_Q_df(Q_df, Q_support_params, dpmndefaults, trial_num):
 
     # q value of the chosen action
     q_val_chosen = trial_wise_q_df[trial_wise_chosen_action]
-    #print('trialwiseqdf', trial_wise_q_df)
-    #print('qvalchosen', q_val_chosen)
 
     # probability of reward value to lie in a normal distribution with (mean =
     # current q-value of the chosen action, variance = bayes_sF)
